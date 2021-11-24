@@ -191,8 +191,6 @@ LIMIT 1""".format(project)
     project_obj = await send_sql(con, cur,
                                  "select `desc` from projects where project_code in ('{0}') limit 1".format(project))
     project_desc = project_obj[0]
-    print(a)
-    print(project_desc)
     dep_id = str(a[0])
     dep_name = str(a[1])
     await message.answer(
