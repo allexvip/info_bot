@@ -1,8 +1,3 @@
-"""
-This is a echo bot.
-It echoes any incoming text messages.
-"""
-
 import logging
 import datetime
 from aiogram import Bot, Dispatcher, executor, types
