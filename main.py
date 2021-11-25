@@ -1,6 +1,9 @@
 import logging
 import datetime
 from aiogram import Bot, Dispatcher, executor, types
+from aiogram.types import ReplyKeyboardRemove, \
+    ReplyKeyboardMarkup, KeyboardButton, \
+    InlineKeyboardMarkup, InlineKeyboardButton
 from settings import *
 import sqlite3
 
@@ -21,33 +24,27 @@ cur = con.cursor()
 
 def models_init():
     # Create table structure
-    cur.execute('''CREATE TABLE IF NOT EXISTS "logs" (
+    cur.executemany('''CREATE TABLE IF NOT EXISTS "logs" (
         "chat_id" BIGINT NULL,
         "username" VARCHAR(50) NULL,
         "upd" DATETIME NULL,
         "message" TEXT NULL
     )
     ;
-    ''')
-
-    cur.execute('''CREATE TABLE IF NOT EXISTS "deps" (
+CREATE TABLE IF NOT EXISTS "deps" (
         "dep_full_name" TEXT NULL,
         "dep" TEXT NULL,
         "party" TEXT NULL,
         "link" TEXT NULL
     )
     ;
-    ''')
-
-    cur.execute('''CREATE TABLE IF NOT EXISTS "projects" (
+CREATE TABLE IF NOT EXISTS "projects" (
         "project_code" VARCHAR(50) NULL,
         "name" TEXT NULL,
         "desc" TEXT NULL
     )
     ;
-    ''')
-
-    cur.execute('''CREATE TABLE IF NOT EXISTS "votes" (
+CREATE TABLE IF NOT EXISTS "votes" (
         "user_answer" VARCHAR(50) NULL,
         "chat_id" BIGINT NULL,
         "upd" DATETIME NULL,
@@ -55,8 +52,7 @@ def models_init():
         "dep_id" INTEGER NULL
     )
     ;
-    ''')
-    cur.execute('''CREATE TABLE IF NOT EXISTS "users" (
+CREATE TABLE IF NOT EXISTS "users" (
 	"chat_id" BIGINT NULL,
 	"username" VARCHAR(50) NULL,
 	"first_name" VARCHAR(50) NULL,
@@ -65,15 +61,25 @@ def models_init():
 	"upd" DATETIME NULL
     )
     ;
-    ''')
-    cur.execute('''CREATE TABLE IF NOT EXISTS "regions" (
-	"region_id" INTEGER NULL,
-	"name" VARCHAR(50) NULL
-    )
-    ;
+create TABLE country(
+	"id" BIGINT not null primary key,
+	"name" VARCHAR(128) null
+	);
+	
+	create table region(
+	"id"			bigint not null primary key,
+	"country_id"	bigint not null REFERENCES country (id),
+	"name"		VARCHAR(128) not null
+	);
+	
+create table city(
+	"region_id"	bigint not null REFERENCES region (id),
+	"name" VARCHAR(128) not null
+	);
+    
     ''')
 
-async def table_to_text(con, cur, sql):
+async def get_total_text(con, cur, sql):
     res = ''
     try:
         cur.execute(sql)
@@ -161,7 +167,7 @@ https://youtu.be/hVAcztBylIc
 @dp.message_handler(commands=['total'])
 async def send_help(message: types.Message):
     cur_time = await current_time()
-    total_str = await table_to_text(con, cur,
+    total_str = await get_total_text(con, cur,
                               "SELECT project_code,(SELECT b.name FROM projects b where b.project_code=a.project_code) AS 'project_name',COUNT(*) AS 'all votes',COUNT(DISTINCT `dep_id`) AS 'unique deps',COUNT(DISTINCT `chat_id`) AS 'unique users'  FROM votes a GROUP BY project_code")
     await message.answer("""Статистика по обращениям к депутатам по состоянию на {0}{1} """.format(cur_time,total_str))
 
