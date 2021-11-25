@@ -103,6 +103,9 @@ https://youtu.be/hVAcztBylIc
 
 Ссылка на само расширение: https://cloud.mail.ru/public/MuK2/CJSZQJc9w
 
+Ещё инструкция (универсальная) по вставке текста:
+https://vinadm.blogspot.com/2017/04/chrome-letterskremlinru.html
+
 Жмите /start""")
 
 
