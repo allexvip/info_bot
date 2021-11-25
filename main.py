@@ -110,7 +110,7 @@ https://youtu.be/hVAcztBylIc
 async def send_help(message: types.Message):
     cur_time = await current_time()
     total_str = await get_total_text(con, cur,
-                              "SELECT project_code,(SELECT b.name FROM projects b where b.project_code=a.project_code) AS 'project_name',COUNT(*) AS 'all votes',COUNT(DISTINCT `dep_id`) AS 'unique deps',COUNT(DISTINCT `chat_id`) AS 'unique users'  FROM votes a GROUP BY project_code")
+                              "SELECT project_code,(SELECT b.name FROM projects b where b.project_code=a.project_code) AS 'project_name',COUNT(*) AS 'all votes',COUNT(DISTINCT `dep_id`) AS 'unique deps',COUNT(DISTINCT `chat_id`) AS 'unique users'  FROM votes a where `project_code`<>'' GROUP BY project_code")
     await message.answer("""Статистика по обращениям к депутатам по состоянию на {0}{1} """.format(cur_time,total_str))
 
 
