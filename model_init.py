@@ -25,7 +25,8 @@ CREATE TABLE IF NOT EXISTS "votes" (
         "chat_id" BIGINT NULL,
         "upd" DATETIME NULL,
         "project_code" VARCHAR(50) NULL,
-        "dep_id" INTEGER NULL
+        "dep_id" INTEGER NULL,
+        comfirmed BOOLEAN NOT NULL CHECK (comfirmed IN (0, 1)) DEFAULT 0
     )
     ;
 CREATE TABLE IF NOT EXISTS "users" (
@@ -52,5 +53,14 @@ create table city(
 	"region_id"	bigint not null REFERENCES region (id),
 	"name" VARCHAR(128) not null
 	);
+
+CREATE TABLE IF NOT EXISTS "answers" (
+	"chat_id" BIGINT NULL,
+	"project_code" VARCHAR(50) NULL,
+	"user_answer" VARCHAR(50) NULL,
+	"dep_id" INTEGER NULL,
+	"upd" DATETIME NULL,
+	"filename" TEXT NULL
+);
 
     ''')

@@ -6,6 +6,7 @@ from aiogram.types import ReplyKeyboardRemove, \
     InlineKeyboardMarkup, InlineKeyboardButton
 from settings import *
 import sqlite3
+from models import repository
 
 con = sqlite3.connect('bot_db.db')
 
@@ -18,8 +19,8 @@ logging.basicConfig(level=logging.INFO)
 # Initialize bot and dispatcher
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
-
 cur = con.cursor()
+
 
 async def get_total_text(con, cur, sql):
     res = ''
@@ -31,7 +32,7 @@ async def get_total_text(con, cur, sql):
 
     records = cur.fetchall()
     for row in records:
-        res +="""\n\n{0}:
+        res += """\n\n{0}:
         
 Активные пользователи - {3}.
 Отправлено обращений - {1}.
@@ -39,6 +40,7 @@ async def get_total_text(con, cur, sql):
 """.format(row[1],row[2],row[3],row[4])
 
     return res
+
 
 async def get_project_info(con, cur, project, field):
     res_list = []
@@ -117,6 +119,21 @@ async def send_help(message: types.Message):
     await message.answer("""Статистика по обращениям к депутатам по состоянию на {0}{1} """.format(cur_time,total_str))
 
 
+@dp.message_handler(commands=['get_unconfirmed_votes', 'get_uv'])
+async def send_unconfirmed_votes(message: types.Message):
+    cur_t = await current_time()
+    repo = repository.RepositorySQLite()
+    repo.connection = con
+    repo.cursor = cur
+    votes = repo.get_unconfirmed_votes_by_chat(message.chat.id)
+    text = '{0}\n'.format(cur_t)
+    for v in votes:
+        print(v)
+        text += '{0}\n'.format(v)
+
+    await message.answer(text)
+
+
 @dp.message_handler(regexp='(^[\/]+[a-z].*)')
 async def send_welcome(message: types.Message):
     await send_sql(con, cur,
@@ -148,7 +165,10 @@ LIMIT 1""".format(project)
         "{0}\n\n{1} \n\nПосле отправки пожалуйста\nнажмите здесь /{2}_{3} \n\n💡 как вставить текст /help".format(
             dep_name,
             project_desc,
-            dep_id, project))
+            dep_id,
+            project
+        )
+    )
 
 
 @dp.message_handler(regexp='^[\/]+[\w].*[_]+[A-Za-z].*')

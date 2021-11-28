@@ -1,0 +1,1 @@
+ALTER TABLE votes ADD COLUMN confirmed BOOLEAN NOT NULL CHECK (confirmed IN (0, 1)) DEFAULT 0;
