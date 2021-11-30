@@ -1,9 +1,7 @@
 import logging
 import datetime
 from aiogram import Bot, Dispatcher, executor, types
-from aiogram.types import ReplyKeyboardRemove, \
-    ReplyKeyboardMarkup, KeyboardButton, \
-    InlineKeyboardMarkup, InlineKeyboardButton
+
 from settings import *
 import sqlite3
 from models import repository
@@ -121,15 +119,19 @@ async def send_help(message: types.Message):
 
 @dp.message_handler(commands=['get_unconfirmed_votes', 'get_uv'])
 async def send_unconfirmed_votes(message: types.Message):
-    cur_t = await current_time()
     repo = repository.RepositorySQLite()
     repo.connection = con
     repo.cursor = cur
     votes = repo.get_unconfirmed_votes_by_chat(message.chat.id)
-    text = '{0}\n'.format(cur_t)
+    text = ''
     for v in votes:
-        print(v)
-        text += '{0}\n'.format(v)
+        formated_str = '{deputy} ({project_name}) - /{confirm_link}'.format(
+            deputy = v.deputy.full_name,
+            project_name = v.project.short_name,
+            confirm_link = v.get_confirm_link()
+        )
+        print(formated_str)
+        text += '{0}\n'.format(formated_str)
 
     await message.answer(text)
 
