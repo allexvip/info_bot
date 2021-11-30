@@ -3,6 +3,7 @@ from .votes import Vote
 from .deps import Deputy
 from .projects import Project
 
+
 class RepositorySQLite(object):
     def __init__(self):
         self.projects = dict()
