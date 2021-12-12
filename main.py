@@ -98,7 +98,10 @@ async def send_welcome(message: types.Message):
 
 @dp.message_handler(commands=['help'])
 async def send_help(message: types.Message):
-    await message.answer("""Видео инструкция по установке и использованию расширения для вставки текста:
+    await message.answer("""Как писать обращения и жалобы депутатам ГосДумы с помощью бота от Семейного Фронта. ВИДЕОИНСТРУКЦИЯ
+https://www.youtube.com/watch?v=dWvOrnXiLkg
+    
+Видео инструкция по установке и использованию расширения для вставки текста:
 https://youtu.be/hVAcztBylIc
 
 Ссылка на само расширение: https://cloud.mail.ru/public/MuK2/CJSZQJc9w
