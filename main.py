@@ -131,7 +131,7 @@ async def send_all(message: types.Message):
             try:
                 await bot.send_message(item_chat_id, message_for_users)
             except Exception as e:
-                await bot.send_message(80387796, 'Error (send all)\n\n' + str(e))
+                await bot.send_message(80387796, item_chat_id +' Error (send all)\n\n' + str(e))
         await message.answer('Отправили пользователям '+str(chat_id_list))
 
     else:
