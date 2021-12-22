@@ -1,6 +1,7 @@
 import logging
 import datetime
 from aiogram import Bot, Dispatcher, executor, types
+from aiogram.types.chat_member import ChatMember
 
 from settings import *
 import sqlite3
@@ -39,6 +40,29 @@ async def get_total_text(con, cur, sql):
 
     return res
 
+async def get_all_users(con, cur):
+    list = []
+    sql= """SELECT distinct chat_id FROM logs where chat_id>0"""
+    a = await from_db(con, cur, sql)
+    for item_a in a:
+        list.append(str(item_a[0]))
+    return list
+
+
+async def get_users_votes(con, cur, project):
+    list = []
+    sql= """SELECT chat_id,project_code,group_concat(dep||' /'||b.rowid||'_'||project_code||'_minus '||' /'||b.rowid||'_'||project_code||'_plus', '\n') AS 'deps_string' FROM votes a 
+JOIN deps b ON b.rowid = a.dep_id
+WHERE a.project_code = 'alijail' 
+GROUP BY chat_id,project_code,chat_id """
+    a = await from_db(con, cur, sql)
+    for item_a in a:
+        inList = []
+        print(item_a)
+        for item in item_a:
+            inList.append(item)
+        list.append(inList)
+    return list
 
 async def get_project_info(con, cur, project, field):
     res_list = []
@@ -53,6 +77,19 @@ async def current_time():
     current_time_res = datetime.datetime.now()
     return current_time_res.strftime("%d-%m-%Y %H:%M")
 
+
+async def from_db(con, cur, sql):
+    res = ''
+    try:
+        # Insert a row of data
+        res = cur.execute(sql)
+        # Save (commit) the changes
+        con.commit()
+    except Exception as e:
+        logging.info('SQL exception' + str(e))
+
+    if sql.lower()[0:6] == 'select':
+        return res.fetchall()
 
 async def send_sql(con, cur, sql):
     res = ''
@@ -72,8 +109,43 @@ async def send_sql(con, cur, sql):
 # Just be sure any changes have been committed or they will be lost.
 # con.close()
 
+@dp.message_handler(commands=['my_appeals'])
+async def send_my_appeals(message: types.Message):
+    await message.answer(str(message.chat.id)+'\n\n'+message.text)
+    list = await get_users_votes(con, cur, 'alijail')
+    for item in list:
+        if item[0] == message.chat.id:
+            await message.answer('Вы писали депутатам:\n\n{}'.format(item[2]))
+
+@dp.message_handler(commands=['send_all'])
+async def send_all(message: types.Message):
+    if message.chat.id == ADMIN_CHAT_ID:
+        message_for_users = message.text.replace('/send_all ','')
+        # await message.answer(str(message.chat.id)+'\n\n'+message.text)
+        chat_id_list = await get_all_users(con, cur)
+        #print(chat_id_list)
+        await bot.send_message(80387796,'/send_all :\n\n' + message_for_users)
+        try:
+            for item_chat_id in chat_id_list:
+                print(item_chat_id+' '+message_for_users)
+                #await bot.send_message(80387796, '/send_all :\n'+item_chat_id+'\n' + message_for_users)
+                #await bot.send_message(item_chat_id, message_for_users)
+            await message.answer('Отправили пользователям '+str(chat_id_list))
+        except Exception as e:
+            await bot.send_message(80387796, 'Error (send all)\n\n'+str(e))
+    else:
+        await message.answer('Ничего не понял. Помощь /help')
+
+
+
 @dp.message_handler(commands=['start'])
 async def send_welcome(message: types.Message):
+    #await message.answer(message.chat.id)
+    #user_channel_status = await bot.get_chat_member(chat_id=-1001176029164, user_id=message.chat.id)
+    # if user_channel_status["status"] != 'left':
+    #     await message.answer('text if in group')
+    # else:
+    #     await message.answer('text if not in group')
     await send_sql(con, cur,
                    "INSERT INTO logs (`chat_id`,`username`,`message`,`upd`) VALUES ('{0}','{1}','{2}',datetime('now'))".format(
                        message.chat.id, message.chat.username, message.text))
