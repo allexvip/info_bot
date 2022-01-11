@@ -53,7 +53,7 @@ async def get_users_votes(con, cur, project):
     list = []
     sql= """SELECT chat_id,project_code,group_concat(dep||' /'||b.rowid||'_'||project_code||'_minus '||' /'||b.rowid||'_'||project_code||'_plus', '\n') AS 'deps_string' FROM votes a 
 JOIN deps b ON b.rowid = a.dep_id
-WHERE a.project_code = 'alijail' 
+WHERE a.project_code = 'alimentover' 
 GROUP BY chat_id,project_code,chat_id """
     a = await from_db(con, cur, sql)
     for item_a in a:
@@ -218,7 +218,7 @@ async def send_welcome(message: types.Message):
 
     # write projects content
     project = message.text.replace('/', '')
-    sql = """SELECT d.rowid,`dep` FROM deps d
+    sql = """SELECT d.rowid,`dep`,`link_send` FROM deps d
 LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}'
 WHERE v.dep_id IS null
 ORDER BY RANDOM()
@@ -226,7 +226,7 @@ LIMIT 1""".format(project)
     a = await send_sql(con, cur, sql)
     if not a:
         """ if all deps already used for first round then we use individual dep for user"""
-        sql = """SELECT d.rowid,`dep`FROM deps d
+        sql = """SELECT d.rowid,`dep`,`link_send` FROM deps d
         LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
         WHERE v.dep_id IS null
         ORDER BY RANDOM()
@@ -237,12 +237,14 @@ LIMIT 1""".format(project)
     project_desc = project_obj[0]
     dep_id = str(a[0])
     dep_name = str(a[1])
+    link_send = str(a[2])
     await message.answer(
-        "{0}\n\n{1} \n\nПосле отправки пожалуйста\nнажмите здесь /{2}_{3} \n\n💡 как вставить текст /help".format(
+        "{0}\n\n{1} \nПишем сюда: {4}\n\nПосле отправки пожалуйста\nнажмите здесь /{2}_{3} \n\n💡 как вставить текст /help".format(
             dep_name,
             project_desc,
             dep_id,
-            project
+            project,
+            link_send
         )
     )
 
