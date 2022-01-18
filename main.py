@@ -35,7 +35,7 @@ async def get_total_text(con, cur, sql):
         
 Активные пользователи - {3}.
 Отправлено обращений - {1}.
-Охвачено {2} депутата(-ов).
+Охвачено {2} парламентария(ев).
 """.format(row[1],row[2],row[3],row[4])
 
     return res
@@ -115,7 +115,7 @@ async def send_my_appeals(message: types.Message):
     list = await get_users_votes(con, cur, 'alijail')
     for item in list:
         if item[0] == message.chat.id:
-            await message.answer('Вы писали депутатам:\n\n{}'.format(item[2]))
+            await message.answer('Вы писали:\n\n{}'.format(item[2]))
 
 @dp.message_handler(commands=['send_all'])
 async def send_all(message: types.Message):
@@ -158,7 +158,7 @@ async def send_welcome(message: types.Message):
                        message.chat.last_name,
                    ))
     await message.answer("""Добро пожаловать!
-Я помогу подать обращение к депутатам госдумы.
+Я помогу подать обращение к депутатам госдумы и Совету Федерации.
 
 Актуальные инициативы:
 - 🔥 Заявление о внесении в ГД законопроекта о введении верхней границы алиментов жмите /alimentover
@@ -188,7 +188,7 @@ async def send_help(message: types.Message):
     cur_time = await current_time()
     total_str = await get_total_text(con, cur,
                               "SELECT project_code,(SELECT b.name FROM projects b where b.project_code=a.project_code) AS 'project_name',COUNT(*) AS 'all votes',COUNT(DISTINCT `dep_id`) AS 'unique deps',COUNT(DISTINCT `chat_id`) AS 'unique users'  FROM votes a where `project_code`<>'' GROUP BY project_code")
-    await message.answer("""Статистика по обращениям к депутатам по состоянию на {0}{1} """.format(cur_time,total_str))
+    await message.answer("""Статистика по обращениям к парламентариям по состоянию на {0}{1} """.format(cur_time,total_str))
 
 
 @dp.message_handler(commands=['get_unconfirmed_votes', 'get_uv'])
@@ -239,12 +239,13 @@ LIMIT 1""".format(project)
     dep_name = str(a[1])
     link_send = str(a[2])
     await message.answer(
-        "{0}\n\n{1} \nПишем сюда: {4}\n\nПосле отправки пожалуйста\nнажмите здесь /{2}_{3} \n\n💡 как вставить текст /help".format(
+        "{0}\n\n{1} \nПишем сюда: {4}\nПримерный текст обращения здесь: {5}\n\n\nПосле отправки пожалуйста\nнажмите здесь /{2}_{3} \n\n💡 как вставить текст /help".format(
             dep_name,
             project_desc,
             dep_id,
             project,
-            link_send
+            link_send,
+            link_target,
         )
     )
 
@@ -265,7 +266,7 @@ async def write_command(message: types.Message):
                        dep_id))
     await message.answer("""✅ Пометил у себя. Спасибо за Ваше участие! 🙂 Вместе мы сила! 💪💪💪 
 
-Чтобы ещё написать другому депутату нажмите: /{0} .
+Чтобы ещё написать другому парламентарию нажмите: /{0} .
 
 Список актуальных инициатив /start""".format(project_code))
 
