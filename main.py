@@ -228,7 +228,7 @@ LIMIT 1""".format(project)
         """ if all deps already used for first round then we use individual dep for user"""
         sql = """SELECT d.rowid,`dep`,`link_send` FROM deps d
         LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
-        WHERE v.dep_id IS null
+        WHERE v.dep_id IS null and person_type='sf'
         ORDER BY RANDOM()
         LIMIT 1""".format(project, message.chat.id)
         a = await send_sql(con, cur, sql)
