@@ -48,6 +48,19 @@ async def get_all_users(con, cur):
         list.append(str(item_a[0]))
     return list
 
+async def get_last_votes(con, cur):
+    list = []
+    sql= """SELECT v.upd||' @'||u.username||' ('||u.chat_id||' '||u.first_name||' '||u.last_name||') - '||d.dep_full_name AS 'answ' FROM votes v
+    JOIN users u ON u.chat_id=v.chat_id
+    JOIN deps d ON d.rowid=v.dep_id
+    WHERE v.project_code='alimentover'
+    ORDER BY v.upd DESC LIMIT 10
+    """
+    a = await from_db(con, cur, sql)
+    for item_a in a:
+        list.append(str(item_a[0]))
+    return list
+
 
 async def get_users_votes(con, cur, project):
     list = []
@@ -116,6 +129,16 @@ async def send_my_appeals(message: types.Message):
     for item in list:
         if item[0] == message.chat.id:
             await message.answer('Вы писали:\n\n{}'.format(item[2]))
+
+# - - - - - - ADMIN
+@dp.message_handler(commands=['last_votes'])
+async def send_last_votes(message: types.Message):
+    if message.chat.id == ADMIN_CHAT_ID:
+        await message.answer('Последние голоса:')
+        list = await get_last_votes(con, cur)
+        for item in list:
+            await message.answer('{}'.format(item))
+
 
 @dp.message_handler(commands=['send_all'])
 async def send_all(message: types.Message):
