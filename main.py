@@ -61,6 +61,13 @@ async def get_last_votes(con, cur):
         list.append(str(item_a[0]))
     return list
 
+async def get_users_count(con, cur):
+    list = []
+    sql= "SELECT COUNT(*) 'all users' FROM users"
+    a = await from_db(con, cur, sql)
+    for item_a in a:
+        list.append(str(item_a[0]))
+    return list
 
 async def get_users_votes(con, cur, project):
     list = []
@@ -131,13 +138,21 @@ async def send_my_appeals(message: types.Message):
             await message.answer('Вы писали:\n\n{}'.format(item[2]))
 
 # - - - - - - ADMIN
-@dp.message_handler(commands=['last_votes'])
-async def send_last_votes(message: types.Message):
+@dp.message_handler(commands=['users_count'])
+async def send_users_count(message: types.Message):
     if message.chat.id == ADMIN_CHAT_ID:
-        await message.answer('Последние голоса:')
-        list = await get_last_votes(con, cur)
+        await message.answer('Общее количество пользователей:')
+        list = await get_users_count(con, cur)
         for item in list:
             await message.answer('{}'.format(item))
+
+@dp.message_handler(commands=['last_votes'])
+async def send_last_votes(message: types.Message):
+    #if message.chat.id == ADMIN_CHAT_ID:
+    await message.answer('Последние голоса:')
+    list = await get_last_votes(con, cur)
+    for item in list:
+        await message.answer('{}'.format(item))
 
 
 @dp.message_handler(commands=['send_all'])
