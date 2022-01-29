@@ -151,6 +151,7 @@ async def send_my_appeals(message: types.Message):
 async def send_users_count(message: types.Message):
     if message.chat.id in admin_chatid_list:
         await message.answer("""Команды администратора:
+        
 /total - всего обращений
 
 /appeals_rate_sf - обращения в Совет Ферации
