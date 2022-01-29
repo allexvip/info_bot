@@ -22,6 +22,13 @@ cur = con.cursor()
 admin_chatid_list = [int(item) for item in ADMIN_CHAT_ID.split(',')]
 
 
+async def send_full_text(chat_id,info):
+    if len(info) > 4096:
+        for x in range(0, len(info), 4096):
+            await bot.send_message(chat_id, info[x:x + 4096])
+    else:
+        await bot.send_message(chat_id, info)
+
 async def get_total_text(con, cur, sql):
     res = ''
     try:
@@ -204,7 +211,7 @@ async def send_appeals_rate_sf(message: types.Message):
         list = await get_sql_first_column(con, cur, sql)
         for item in list:
             text += '\n' + item
-        await message.answer(text)
+        await send_full_text(message.from_user.id,text) #message.answer(text)
 
 
 @dp.message_handler(commands=['appeals_rate_dep'])
@@ -217,11 +224,12 @@ async def send_appeals_rate_sf(message: types.Message):
         list = await get_sql_first_column(con, cur, sql)
         for item in list:
             text += '\n' + item
-        await message.answer(text)
+        await send_full_text(message.from_user.id,text)#message.answer(text)
 
 
 @dp.message_handler(commands=['send_all'])
 async def send_all(message: types.Message):
+    text_err = 'Error (send all)'
     if message.chat.id in admin_chatid_list:
         message_for_users = message.text.replace('/send_all ', '')
         # await message.answer(str(message.chat.id)+'\n\n'+message.text)
@@ -234,9 +242,11 @@ async def send_all(message: types.Message):
             try:
                 await bot.send_message(item_chat_id, message_for_users)
             except Exception as e:
-                await bot.send_message(80387796, item_chat_id + ' Error (send all)\n\n' + str(e))
-        await message.answer('Отправили пользователям ' + str(chat_id_list))
+                text_err +='\n\n'+str(e)
 
+        await message.answer('Отправили пользователям ' + str(chat_id_list))
+        await send_full_text(80387796, 'Отправили пользователям ' + str(chat_id_list))
+        await send_full_text(80387796, text_err)
     else:
         await message.answer('Ничего не понял. Помощь /help')
 
