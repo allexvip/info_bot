@@ -149,9 +149,10 @@ async def send_my_appeals(message: types.Message):
 async def send_users_count(message: types.Message):
     if message.chat.id == ADMIN_CHAT_ID:
         await message.answer("""Команды администратора: 
-        /appeals_rate_sf или /appeals_rate_dep - кол-во обращений к каждому парламентарию 
-        Пример 
+        /appeals_rate_sf - кол-во обращений в Совет Ферации
         
+        /appeals_rate_dep - кол-во обращений в Госдуму 
+                
         /users_count - общее количество пользователей бота
         
         /last_votes - последние голоса
