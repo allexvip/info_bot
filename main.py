@@ -48,6 +48,13 @@ async def get_all_users(con, cur):
         list.append(str(item_a[0]))
     return list
 
+async def get_sql_first_column(con, cur,sql):
+    list = []
+    a = await from_db(con, cur, sql)
+    for item_a in a:
+        list.append(str(item_a[0]))
+    return list
+
 async def get_last_votes(con, cur):
     list = []
     sql= """SELECT v.upd||' @'||u.username||' ('||u.chat_id||' '||u.first_name||' '||u.last_name||') - '||d.dep_full_name AS 'answ' FROM votes v
@@ -138,6 +145,21 @@ async def send_my_appeals(message: types.Message):
             await message.answer('Вы писали:\n\n{}'.format(item[2]))
 
 # - - - - - - ADMIN
+@dp.message_handler(commands=['admin'])
+async def send_users_count(message: types.Message):
+    if message.chat.id == ADMIN_CHAT_ID:
+        await message.answer("""Команды администратора: 
+        /appeals_rate_sf или /appeals_rate_dep - кол-во обращений к каждому парламентарию 
+        Пример 
+        
+        /users_count - общее количество пользователей бота
+        
+        /last_votes - последние голоса
+        
+        /send_all {текст} - отправить сообщение всем пользователям бота
+        
+        """)
+
 @dp.message_handler(commands=['users_count'])
 async def send_users_count(message: types.Message):
     if message.chat.id == ADMIN_CHAT_ID:
@@ -148,11 +170,35 @@ async def send_users_count(message: types.Message):
 
 @dp.message_handler(commands=['last_votes'])
 async def send_last_votes(message: types.Message):
-    #if message.chat.id == ADMIN_CHAT_ID:
-    await message.answer('Последние голоса:')
-    list = await get_last_votes(con, cur)
-    for item in list:
-        await message.answer('{}'.format(item))
+    if message.chat.id == ADMIN_CHAT_ID:
+        await message.answer('Последние голоса:')
+        list = await get_last_votes(con, cur)
+        for item in list:
+            await message.answer('{}'.format(item))\
+
+@dp.message_handler(commands=['appeals_rate_sf'])
+async def send_appeals_rate_sf(message: types.Message):
+    if message.chat.id == ADMIN_CHAT_ID:
+        sql = """SELECT b.cnt ||' '||d.dep AS 'asw' FROM deps d
+    JOIN (SELECT a.dep_id,COUNT(*) AS cnt FROM votes a GROUP BY a.dep_id) b ON d.rowid=b.dep_id
+    WHERE d.person_type IN ('sf') ORDER BY `cnt` desc """
+        text = 'Кол-во обращений парламентарию СФ:'
+        list = await get_sql_first_column(con, cur, sql)
+        for item in list:
+            text +='\n'+item
+        await message.answer(text)
+
+@dp.message_handler(commands=['appeals_rate_dep'])
+async def send_appeals_rate_sf(message: types.Message):
+    if message.chat.id == ADMIN_CHAT_ID:
+        sql = """SELECT b.cnt ||' '||d.dep AS 'asw' FROM deps d
+    JOIN (SELECT a.dep_id,COUNT(*) AS cnt FROM votes a GROUP BY a.dep_id) b ON d.rowid=b.dep_id
+    WHERE d.person_type IN ('deputat') ORDER BY `cnt` desc """
+        text = 'Кол-во обращений парламентарию СФ:'
+        list = await get_sql_first_column(con, cur, sql)
+        for item in list:
+            text +='\n'+item
+        await message.answer(text)
 
 
 @dp.message_handler(commands=['send_all'])
