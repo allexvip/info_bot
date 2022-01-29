@@ -345,17 +345,18 @@ LIMIT 1""".format(project)
     project_obj = await send_sql(con, cur,
                                  "select `desc` from projects where project_code in ('{0}') limit 1".format(project))
     # project_desc = project_obj[0]
-    dep_id = str(a[0])
-    dep_name = str(a[1])
-    link_send = str(a[2])
 
-    text_appeal = """Разово скачайте файл законопроекта: https://vk.cc/c7LhIc
-
-Примерный текст обращения здесь: https://semfront.ru/prog/texter.php?case=alimentover&user={0}&face={1}
-
-В этом тексте нужно выбрать нужно тип Заявление и обязательно приложите файл законопроекта к обращению.  """.format(
-        message.from_user.id, dep_name.replace(' ', '%20'))
     if not flag_done:
+        dep_id = str(a[0])
+        dep_name = str(a[1])
+        link_send = str(a[2])
+
+        text_appeal = """Разово скачайте файл законопроекта: https://vk.cc/c7LhIc
+
+        Примерный текст обращения здесь: https://semfront.ru/prog/texter.php?case=alimentover&user={0}&face={1}
+
+        В этом тексте нужно выбрать нужно тип Заявление и обязательно приложите файл законопроекта к обращению.  """.format(
+            message.from_user.id, dep_name.replace(' ', '%20'))
         await message.answer(
             "{0}\n\n{1} \nПишем сюда: {4}\n\nПосле отправки пожалуйста\nнажмите здесь /{2}_{3} \n\n💡 как вставить текст /help".format(
                 dep_name,
