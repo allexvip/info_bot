@@ -302,6 +302,7 @@ async def send_welcome(message: types.Message):
                        message.chat.id, message.chat.username, message.text))
 
     # write projects content
+    flag_done = False
     project = message.text.replace('/', '')
     sql = """SELECT d.rowid,`dep`,`link_send` FROM deps d
 LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}'
@@ -317,6 +318,8 @@ LIMIT 1""".format(project)
         ORDER BY RANDOM()
         LIMIT 1""".format(project, message.chat.id)
         a = await send_sql(con, cur, sql)
+        if not a:
+            flag_done = True
     project_obj = await send_sql(con, cur,
                                  "select `desc` from projects where project_code in ('{0}') limit 1".format(project))
     # project_desc = project_obj[0]
@@ -329,16 +332,20 @@ LIMIT 1""".format(project)
 Примерный текст обращения здесь: https://semfront.ru/prog/texter.php?case=alimentover&user={0}&face={1}
 
 В этом тексте нужно выбрать нужно тип Заявление и обязательно приложите файл законопроекта к обращению.  """.format(message.from_user.id,dep_name.replace(' ','%20'))
-
-    await message.answer(
-        "{0}\n\n{1} \nПишем сюда: {4}\n\nПосле отправки пожалуйста\nнажмите здесь /{2}_{3} \n\n💡 как вставить текст /help".format(
-            dep_name,
-            text_appeal,
-            dep_id,
-            project,
-            link_send
+    if not flag_done:
+        await message.answer(
+            "{0}\n\n{1} \nПишем сюда: {4}\n\nПосле отправки пожалуйста\nнажмите здесь /{2}_{3} \n\n💡 как вставить текст /help".format(
+                dep_name,
+                text_appeal,
+                dep_id,
+                project,
+                link_send
+            )
         )
-    )
+    else:
+        await message.answer("""✅ Спасибо Вам за то, что вы отправили обращения всем парламентариям! 💪💪💪 "
+                             Список актуальных инициатив /start
+                             """)
 
 
 @dp.message_handler(regexp='^[\/]+[\w].*[_]+[A-Za-z].*')
