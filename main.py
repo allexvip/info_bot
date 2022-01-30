@@ -204,9 +204,17 @@ async def send_last_votes(message: types.Message):
 @dp.message_handler(commands=['appeals_rate_sf'])
 async def send_appeals_rate_sf(message: types.Message):
     if message.chat.id in admin_chatid_list:
+        sql = """SELECT COUNT(*) AS 'cnt'  FROM votes a
+JOIN deps d ON d.rowid=a.dep_id AND d.person_type='sf'
+WHERE a.project_code='alimentover' """
+        text = """Всего обращений сенаторам Совета Федерации: """
+        list = await get_sql_first_column(con, cur, sql)
+        text += list[0]
+        await send_full_text(message.from_user.id, text)
+
         sql = """SELECT b.cnt ||' '||d.dep AS 'asw' FROM deps d
-    JOIN (SELECT a.dep_id,COUNT(*) AS cnt FROM votes a GROUP BY a.dep_id) b ON d.rowid=b.dep_id
-    WHERE d.person_type IN ('sf') ORDER BY `cnt` desc """
+        JOIN (SELECT a.dep_id,COUNT(*) AS cnt FROM votes a GROUP BY a.dep_id) b ON d.rowid=b.dep_id
+        WHERE d.person_type IN ('sf') ORDER BY `cnt` desc """
         text = """Статистика обращений по сенаторам Совета Федерации:
 Кол-во обращений парламентарию СФ: """
         list = await get_sql_first_column(con, cur, sql)
@@ -216,8 +224,16 @@ async def send_appeals_rate_sf(message: types.Message):
 
 
 @dp.message_handler(commands=['appeals_rate_dep'])
-async def send_appeals_rate_sf(message: types.Message):
+async def send_appeals_rate_dep(message: types.Message):
     if message.chat.id in admin_chatid_list:
+        sql = """SELECT COUNT(*) AS 'cnt'  FROM votes a
+        JOIN deps d ON d.rowid=a.dep_id AND d.person_type='deputat'
+        WHERE a.project_code='alimentover' """
+        text = """Всего обращений в Госдуму: """
+        list = await get_sql_first_column(con, cur, sql)
+        text += list[0]
+        await send_full_text(message.from_user.id, text)
+
         sql = """SELECT b.cnt ||' '||d.dep AS 'asw' FROM deps d
     JOIN (SELECT a.dep_id,COUNT(*) AS cnt FROM votes a GROUP BY a.dep_id) b ON d.rowid=b.dep_id
     WHERE d.person_type IN ('deputat') ORDER BY `cnt` desc """
