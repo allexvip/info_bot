@@ -481,25 +481,25 @@ LIMIT 1""".format(project)
                              """)
 
 
-# @dp.message_handler(regexp='^[\/]+[\w].*[_]+[A-Za-z].*')
-# async def write_command(message: types.Message):
-#     # for write in db votes
-#     await send_sql(con, cur,
-#                    "INSERT INTO logs (`chat_id`,`username`,`message`,`upd`) VALUES ('{0}','{1}','{2}',datetime('now'))".format(
-#                        message.chat.id, message.chat.username, message.text))
-#     project_code = message.text.split('_')[1]
-#     dep_id = message.text.split('_')[0].replace('/', '')
-#     await send_sql(con, cur,
-#                    "INSERT INTO votes (`chat_id`,`user_answer`,`project_code`,`dep_id`,`upd`) VALUES ('{0}','{1}','{2}','{3}',datetime('now'))".format(
-#                        message.chat.id,
-#                        message.text,
-#                        project_code,
-#                        dep_id))
-#     await message.answer("""✅ Пометил у себя. Спасибо за Ваше участие! 🙂 Вместе мы сила! 💪💪💪
-#
-# Чтобы ещё написать другому парламентарию нажмите: /{0} .
-#
-# Список актуальных инициатив /start""".format(project_code))
+@dp.message_handler(regexp='^[\/]+[\w].*[_]+[A-Za-z].*')
+async def write_command(message: types.Message):
+    #for write in db votes
+    await send_sql(con, cur,
+                    "INSERT INTO logs (`chat_id`,`username`,`message`,`upd`) VALUES ('{0}','{1}','{2}',datetime('now'))".format(
+                        message.chat.id, message.chat.username, message.text))
+    project_code = message.text.split('_')[1]
+    dep_id = message.text.split('_')[0].replace('/', '')
+    await send_sql(con, cur,
+                    "INSERT INTO votes (`chat_id`,`user_answer`,`project_code`,`dep_id`,`upd`) VALUES ('{0}','{1}','{2}','{3}',datetime('now'))".format(
+                        message.chat.id,
+                        message.text,
+                        project_code,
+                        dep_id))
+    await message.answer("""✅ Пометил у себя. Спасибо за Ваше участие! 🙂 Вместе мы сила! 💪💪💪
+
+ Чтобы ещё написать другому парламентарию нажмите: /{0} .
+
+Список актуальных инициатив /start""".format(project_code))
 
 
 @dp.message_handler()
