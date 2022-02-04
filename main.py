@@ -179,7 +179,6 @@ async def send_users_count(message: types.Message):
 @dp.message_handler(commands=['df'])
 async def send_help(message: types.Message):
     if message.chat.id in admin_chatid_list:
-        cur_time = await current_time()
         df = await get_df('SELECT * FROM users')
         print(df)
         await message.answer("df в принте")
