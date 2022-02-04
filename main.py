@@ -7,8 +7,12 @@ from aiogram.utils.callback_data import CallbackData
 from settings import *
 import sqlite3
 from models import repository
+import pandas as pd
+from sqlalchemy import create_engine
 
-con = sqlite3.connect('bot_db.db')
+db_file_path = 'bot_db.db'
+
+con = sqlite3.connect(db_file_path)
 
 # logging.basicConfig(filename= LOGGING_FILE_NAME , encoding='utf-8', level=logging.DEBUG)
 API_TOKEN = TELEGRAM_BOT_API_KEY
@@ -30,6 +34,10 @@ async def send_full_text(chat_id, info):
     else:
         await bot.send_message(chat_id, info)
 
+
+async def get_df(sql):
+    df = pd.read_sql(sql, create_engine(f'sqlite:///{db_file_path}'))
+    return df
 
 async def get_total_text(con, cur, sql):
     res = ''
@@ -167,6 +175,14 @@ async def send_users_count(message: types.Message):
 /send_all {текст} - отправить сообщение всем пользователям бота
         
         """)
+
+@dp.message_handler(commands=['df'])
+async def send_help(message: types.Message):
+    if message.chat.id in admin_chatid_list:
+        cur_time = await current_time()
+        df = await get_df('SELECT * FROM users')
+        print(df)
+        await message.answer("df в принте")
 
 
 @dp.message_handler(commands=['total'])
