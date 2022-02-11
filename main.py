@@ -324,7 +324,7 @@ async def send_all(message: types.Message):
 async def send_to_start_users(message: types.Message):
     text_err = 'Error (send_to_start_users)'
     if message.chat.id in admin_chatid_list:
-        message_for_users = message.text.replace('/send_to_not_active ', '')
+        message_for_users = message.text.replace('/send_to_start_users ', '')
         sql = """SELECT a.chat_id,a.message,max(a.upd) FROM logs a GROUP BY a.chat_id HAVING message IN ('/start') """
         chat_id_list = await get_sql_first_column(con, cur, sql)
         for item_chat_id in chat_id_list:
