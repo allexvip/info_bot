@@ -71,6 +71,7 @@ async def get_all_users(con, cur):
 async def get_sql_first_column(con, cur, sql):
     list = []
     a = await from_db(con, cur, sql)
+    print(a)
     for item_a in a:
         list.append(str(item_a[0]))
     return list
@@ -171,6 +172,8 @@ async def send_users_count(message: types.Message):
 /users_count - общее количество пользователей бота
         
 /last_votes - последние голоса
+
+/send_to_start_users {текст} - отправить сообщение новым пользователям бота 
         
 /send_all {текст} - отправить сообщение всем пользователям бота
         
@@ -290,6 +293,27 @@ async def send_all(message: types.Message):
         for item_chat_id in chat_id_list:
             print(item_chat_id + ' ' + message_for_users)
             # await bot.send_message(80387796, '/send_all :\n'+item_chat_id+'\n' + message_for_users)
+            try:
+                await bot.send_message(item_chat_id, message_for_users)
+            except Exception as e:
+                text_err += '\n\n' + str(e)
+
+        await message.answer('Отправили пользователям ' + str(chat_id_list))
+        await send_full_text(80387796, 'Отправили пользователям ' + str(chat_id_list))
+        await send_full_text(80387796, text_err)
+    else:
+        await message.answer('Ничего не понял. Помощь /help')
+
+@dp.message_handler(commands=['send_to_start_users'])
+async def send_to_start_users(message: types.Message):
+    text_err = 'Error (send_to_start_users)'
+    if message.chat.id in admin_chatid_list:
+        message_for_users = message.text.replace('/send_to_not_active ', '')
+        sql = """SELECT a.chat_id,a.message,max(a.upd) FROM logs a GROUP BY a.chat_id HAVING message IN ('/start') """
+        chat_id_list = await get_sql_first_column(con, cur, sql)
+        for item_chat_id in chat_id_list:
+            print(item_chat_id + ' ' + message_for_users)
+            #await bot.send_message(80387796, '/send_all :\n'+item_chat_id+'\n' + message_for_users)
             try:
                 await bot.send_message(item_chat_id, message_for_users)
             except Exception as e:
