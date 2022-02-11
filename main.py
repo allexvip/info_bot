@@ -173,6 +173,8 @@ async def send_users_count(message: types.Message):
         
 /last_votes - последние голоса
 
+/no_active_users - неактивные пользователи
+
 /send_to_start_users {текст} - отправить сообщение новым пользователям бота 
         
 /send_all {текст} - отправить сообщение всем пользователям бота
@@ -219,7 +221,21 @@ async def send_last_votes(message: types.Message):
         list = await get_sql_first_column(con, cur, sql)
         for item in list:
             text += '\n\n' + item
-        await message.answer(text)
+        await message.answer(text)\
+
+@dp.message_handler(commands=['no_active_users'])
+async def no_active_users(message: types.Message):
+    if message.chat.id in admin_chatid_list:
+        sql = """SELECT '@'||u.username||' ('||u.first_name||' '||u.last_name||') '||u.chat_id||'\n'||msg AS 'answ' from users u
+JOIN (
+SELECT a.chat_id,a.message,max(a.upd),group_concat(message) as msg,COUNT(*) AS 'cnt' FROM logs a GROUP BY a.chat_id HAVING message IN ('/start') AND cnt<7
+) b ON b.chat_id=u.chat_id
+    """
+        text = 'Неактивные пользователи:'
+        list = await get_sql_first_column(con, cur, sql)
+        for item in list:
+            text += '\n\n' + item
+        await send_full_text(message.chat.id,text)
 
 
 @dp.message_handler(commands=['appeals_rate_sf'])
