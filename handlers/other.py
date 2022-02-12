@@ -13,7 +13,7 @@ from aiogram.types.chat_member import ChatMember
 
 @dp.message_handler(lambda message: 'test' in message.text)
 async def taxi(message: types.Message):
-    answ = await bot.get_chat_member(chat_id=-613736018, user_id=message.from_user.id)
+    answ = await bot.get_chat_member(chat_id=MAIN_CHANNEL_CHAT_ID, user_id=message.from_user.id)
     print(answ['status'])
     await message.answer(str(answ['status']))
     # await message.delete()
@@ -26,7 +26,7 @@ async def echo(message: types.Message):
             message.chat.id,
             message.chat.username,
             message.text))
-    user_info = await bot.get_chat_member(chat_id=-613736018, user_id=message.from_user.id)
+    user_info = await bot.get_chat_member(chat_id=MAIN_CHANNEL_CHAT_ID, user_id=message.from_user.id)
     answ_text = '@{} {}\n({} {} {})'.format(message.from_user.username, user_info['status'],
                                             message.from_user.first_name,
                                             message.from_user.last_name, message.from_user.id)
