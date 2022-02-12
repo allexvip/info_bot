@@ -9,6 +9,7 @@ storage=MemoryStorage()
 load_dotenv()
 
 BOT_NAME = os.getenv('TELEGRAM_BOT_NAME')
+BOT_USER_ANSWERS_CHAT_ID = os.getenv('BOT_USER_ANSWERS_CHAT_ID')
 DB_FILE_NAME = os.getenv('DB_FILE_NAME')
 ADMIN_CHAT_ID = os.getenv('ADMIN_CHAT_ID')
 admin_chatid_list = [int(item) for item in ADMIN_CHAT_ID.split(',')]
