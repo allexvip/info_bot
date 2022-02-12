@@ -30,10 +30,12 @@ async def echo(message: types.Message):
     answ_text = '@{} {}\n({} {} {})'.format(message.from_user.username, user_info['status'],
                                             message.from_user.first_name,
                                             message.from_user.last_name, message.from_user.id)
-    await bot.send_message(BOT_USER_ANSWERS_CHAT_ID, answ_text)
-    await message.send_copy(chat_id=BOT_USER_ANSWERS_CHAT_ID, disable_notification=True, reply_to_message_id=True)
-    await message.answer('Ничего не понял. Помощь /help')
-    await message.delete()
+    if len(message.text)<15:
+        await message.answer('Ничего не понял. Помощь /help')
+    else:
+        await bot.send_message(BOT_USER_ANSWERS_CHAT_ID, answ_text)
+        await message.send_copy(chat_id=BOT_USER_ANSWERS_CHAT_ID, disable_notification=True, reply_to_message_id=True)
+        await message.answer('Переслал Ваше сообщение модератору.\nСпасибо! \n\nПомощь /help')
 
 
 def register_handlers_other(dp: Dispatcher):
