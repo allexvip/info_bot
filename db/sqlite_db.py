@@ -7,6 +7,14 @@ from sqlalchemy import create_engine
 import datetime
 
 
+async def get_data(sql):
+    try:
+        cur.execute(sql)
+        con.commit()
+    except Exception as e:
+        logging.info('SQL exception get_data(): ' + str(e))
+    return cur.fetchall()
+
 async def send_full_text(chat_id, info):
     if len(info) > 4096:
         for x in range(0, len(info), 4096):
