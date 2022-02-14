@@ -39,7 +39,6 @@ async def set_city(message: types.Message):
     vote_region_cb = CallbackData('vote', 'action', 'amount')  # post:<action>:<amount>
     region_data = await get_data("SELECT id,name FROM region WHERE country_id=0 ORDER BY name")
     region_dict = dict(region_data)
-    print(region_dict)
 
     def get_keyboard(dict,action):
         urlkb = types.InlineKeyboardMarkup(row_width=2)
@@ -58,7 +57,6 @@ async def set_city(message: types.Message):
         global city_dict
         city_data = await get_data("SELECT rowid,name FROM city WHERE region_id={} ORDER BY name".format(amount))
         city_dict = dict(city_data)
-        print(city_dict)
         await send_sql(
             "UPDATE users set region_id = '{0}' where chat_id={1}".format(
                 amount,
