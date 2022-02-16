@@ -40,18 +40,19 @@ async def set_city(message: types.Message):
     region_data = await get_data("SELECT id,name FROM region WHERE country_id=0 ORDER BY name")
     region_dict = dict(region_data)
 
-    def get_keyboard(dict,action):
-        urlkb = types.InlineKeyboardMarkup(row_width=2)
+    def get_keyboard(dict, action):
+        urlkb = types.InlineKeyboardMarkup(row_width=3)
         inline_buttons_list = []
         for key in dict.keys():
             inline_buttons_list.append(types.InlineKeyboardButton(dict[key],
-                                       callback_data=vote_region_cb.new(action= action, amount=key), ),)
+                                                                  callback_data=vote_region_cb.new(action=action,
+                                                                                                   amount=key), ), )
         urlkb.add(*inline_buttons_list)
         return urlkb
 
-    await message.answer('Выберите Ваш регион и город:', reply_markup=get_keyboard(region_dict,'set_region'))
+    await message.answer('Выберите Ваш регион:', reply_markup=get_keyboard(region_dict, 'region'))
 
-    @dp.callback_query_handler(vote_region_cb.filter(action='set_region'))
+    @dp.callback_query_handler(vote_region_cb.filter(action='region'))
     async def vote_up_cb_handler(query: types.CallbackQuery, callback_data: dict):
         amount = int(callback_data['amount'])
         global city_dict
@@ -62,11 +63,17 @@ async def set_city(message: types.Message):
                 amount,
                 message.chat.id
             ))
-        await bot.edit_message_text('{}'.format(region_dict[amount]), query.from_user.id,
+        await bot.edit_message_text('Вы выбрали: {0}'.format(region_dict[amount]),
+                                    query.from_user.id,
                                     query.message.message_id,
-                                    reply_markup=get_keyboard(city_dict,'set_city'))
+                                    reply_markup=None)
+        await query.message.answer('Спасибо! 👍 Пока выбираем регион, в будущем добавим города.\n\nЧтобы исправить Ваш регион - используйте /set_city')
+        await send_projects_list(query.message)
+        # await bot.edit_message_text('{}'.format(region_dict[amount]), query.from_user.id,
+        #                             query.message.message_id,
+        #                             reply_markup=get_keyboard(city_dict, 'city'))
 
-    @dp.callback_query_handler(vote_region_cb.filter(action='set_city'))
+    @dp.callback_query_handler(vote_region_cb.filter(action='city'))
     async def vote_up_cb_handler(query: types.CallbackQuery, callback_data: dict):
         amount = int(callback_data['amount'])
         await send_sql(
@@ -74,7 +81,8 @@ async def set_city(message: types.Message):
                 amount,
                 message.chat.id
             ))
-        await bot.edit_message_text('Вы выбрали: {0}, {1}'.format(query.message.text,city_dict[amount]), query.from_user.id,
+        await bot.edit_message_text('Вы выбрали: {0}, {1}'.format(query.message.text, city_dict[amount]),
+                                    query.from_user.id,
                                     query.message.message_id,
                                     reply_markup=None)
         await query.message.answer('Спасибо! 👍\n\nЧтобы исправить Ваш регион и город используйте /set_city')
@@ -88,6 +96,7 @@ async def send_my_appeals(message: types.Message):
     for item in list:
         if item[0] == message.chat.id:
             await message.answer('Вы писали:\n\n{}'.format(item[2]))
+
 
 @dp.message_handler(commands=['start'])
 async def send_welcome(message: types.Message):
@@ -116,12 +125,12 @@ async def send_welcome(message: types.Message):
 
 💡 как вставить текст /help
 """)
-    res = await get_data("select city_id from users where chat_id = {} limit 1".format(message.from_user.id))
+    res = await get_data("select region_id from users where chat_id = {} limit 1".format(message.from_user.id))
     if res[0][0] == None:
         await set_city(message)
 
-""" - ‼️ Жалоба на законопроекты о введении уголовного наказания за частичную неуплату алиментов жмите /alijail """
 
+""" - ‼️ Жалоба на законопроекты о введении уголовного наказания за частичную неуплату алиментов жмите /alijail """
 
 
 @dp.message_handler(commands=['help'])
@@ -138,6 +147,7 @@ https://youtu.be/hVAcztBylIc
 https://vinadm.blogspot.com/2017/04/chrome-letterskremlinru.html
 
 Жмите /start""")
+
 
 @dp.message_handler(commands=['get_unconfirmed_votes', 'get_uv'])
 async def send_unconfirmed_votes(message: types.Message):
@@ -156,6 +166,7 @@ async def send_unconfirmed_votes(message: types.Message):
         text += '{0}\n'.format(formated_str)
 
     await message.answer(text)
+
 
 @dp.message_handler(regexp='(^[\/]+[a-z].*)')
 async def send_project_info(message: types.Message):
@@ -261,6 +272,7 @@ LIMIT 1""".format(project)
     Список актуальных инициатив /start
                          """)
 
+
 @dp.message_handler(regexp='^[\/]+[\w].*[_]+[A-Za-z].*')
 async def write_command(message: types.Message):
     # for write in db votes
@@ -280,6 +292,7 @@ async def write_command(message: types.Message):
 Чтобы ещё написать другому парламентарию нажмите: /{0} .
 
 Список актуальных инициатив /start""".format(project_code))
+
 
 def register_handlers_client(dp: Dispatcher):
     dp.message_handler(set_city)
