@@ -35,12 +35,12 @@ async def echo(message: types.Message):
             user_info = await bot.get_chat_member(chat_id=MAIN_CHANNEL_CHAT_ID, user_id=message.from_user.id)
         except:
             pass
-        answ_text = '@{0} {1}\n({2} {3} {4}\nОтвет:\n@{5} /send {4}|'.format(message.from_user.username,
+        answ_text = '@{0} {1}\n({2} {3} {4}\nОтвет:\n\n/send {4}|'.format(message.from_user.username,
                                                                   user_info['status'],
                                                                   message.from_user.first_name,
                                                                   message.from_user.last_name,
-                                                                  message.from_user.id,
-                                                                  BOT_NAME)
+                                                                  message.from_user.id
+                                                                  )
         if len(message.text) < 15:
             await message.answer('Ничего не понял. Помощь /help')
         else:

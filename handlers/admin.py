@@ -177,7 +177,7 @@ async def send_to_user(message: types.Message):
             data_list = msg.split('/send ')[1].split('|')
             to_chat_id = data_list[0]
             message_for_user = data_list[1]
-            print(to_chat_id + ' ' + message_for_user)
+            #print(to_chat_id + ' ' + message_for_user)
             try:
                 await bot.send_message(to_chat_id, message_for_user)
                 await message.answer('Отправлено пользователю: ' + str(to_chat_id))
