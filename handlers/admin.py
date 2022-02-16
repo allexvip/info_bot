@@ -165,6 +165,25 @@ async def send_appeals_rate_dep(message: types.Message):
             text += '\n' + item
         await send_full_text(message.from_user.id, text)  # message.answer(text)
 
+@dp.message_handler(lambda message: '/send ' in message.text)
+async def send_to_user(message: types.Message):
+    if message.from_user.id in admin_chatid_list:
+        text_err = 'Error (send)'
+        if message.from_user.id in admin_chatid_list:
+            msg = message.text
+            data_list = msg.split('/send ')[1].split('|')
+            to_chat_id = data_list[0]
+            message_for_user = data_list[1]
+            print(to_chat_id + ' ' + message_for_user)
+            try:
+                await bot.send_message(to_chat_id, message_for_user)
+                await message.answer('Отправлено пользователю: ' + str(to_chat_id))
+            except Exception as e:
+                text_err += '\n\n' + str(e)
+                await send_full_text(80387796, text_err)
+    else:
+        await message.answer('Ничего не понял. Помощь /help')
+
 
 @dp.message_handler(commands=['send_all'])
 async def send_all(message: types.Message):
