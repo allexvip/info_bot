@@ -44,8 +44,11 @@ async def send_admin_info(message: types.Message):
 
 /send_to_start_users {текст} - отправить сообщение новым пользователям бота 
 
+/send {chat_id}|{текст} - текст для отправки пользователю по chat_id
+
 /send_all {текст} - отправить сообщение всем пользователям бота
 
+{любой текст более 15 символов} - пересылка сообщения в чат поддержки
         """)
 
 @dp.message_handler(commands=['df'])
