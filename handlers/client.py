@@ -50,7 +50,7 @@ async def set_city(message: types.Message):
         urlkb.add(*inline_buttons_list)
         return urlkb
 
-    await message.answer('Выберите Ваш регион:', reply_markup=get_keyboard(region_dict, 'region'))
+    await message.answer('Для совместных походов к народным избранникам в регионах нам нужно чтобы Вы выбрали Ваш регион:', reply_markup=get_keyboard(region_dict, 'region'))
 
     @dp.callback_query_handler(vote_region_cb.filter(action='region'))
     async def vote_up_cb_handler(query: types.CallbackQuery, callback_data: dict):

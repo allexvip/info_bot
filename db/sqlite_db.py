@@ -60,7 +60,7 @@ async def get_all_users(con, cur):
 async def get_sql_first_column(sql):
     list = []
     a = await from_db(sql)
-    print(a)
+    #print(a)
     for item_a in a:
         list.append(str(item_a[0]))
     return list
