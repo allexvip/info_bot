@@ -72,11 +72,23 @@ async def send_total(message: types.Message):
 @dp.message_handler(commands=['users_count'])
 async def send_users_count(message: types.Message):
     if message.from_user.id in admin_chatid_list:
-        await message.answer('Общее количество пользователей:')
+        text = 'Общее количество пользователей:'
         list = await get_users_count(con, cur)
         for item in list:
-            await message.answer('{}'.format(item))
-
+            text += '\n' + item
+        await message.answer(text)
+        # по регионам
+        sql = """SELECT b.cnt||' '||a.name AS answ FROM (
+                SELECT u.region_id,COUNT(*) AS cnt FROM users u
+                GROUP BY u.region_id) b
+                JOIN region a ON a.id=b.region_id
+                ORDER BY cnt desc
+           """
+        text = 'Кол-во пользователей по регионам:'
+        list = await get_sql_first_column(sql)
+        for item in list:
+            text += '\n' + item
+        await message.answer(text)
 
 @dp.message_handler(commands=['last_votes'])
 async def send_last_votes(message: types.Message):
@@ -91,7 +103,7 @@ async def send_last_votes(message: types.Message):
         list = await get_sql_first_column( sql)
         for item in list:
             text += '\n\n' + item
-        await message.answer(text)\
+        await message.answer(text)
 
 
 
