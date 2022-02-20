@@ -62,7 +62,7 @@ async def set_city(message: types.Message):
                 amount,
                 query.from_user.id
             )
-        print(sql)
+        logging.info(f'{query.from_user.id} region_id: {amount}')
         await send_sql(sql)
         await bot.edit_message_text('Вы выбрали: {0}'.format(region_dict[amount]),
                                     query.from_user.id,
@@ -82,6 +82,7 @@ async def set_city(message: types.Message):
                 amount,
                 query.from_user.id
             ))
+        logging.info(f'{query.from_user.id} region_id: {amount}')
         await bot.edit_message_text('Вы выбрали: {0}, {1}'.format(query.message.text, city_dict[amount]),
                                     query.from_user.id,
                                     query.message.message_id,
