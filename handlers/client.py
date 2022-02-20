@@ -34,7 +34,7 @@ async def send_projects_list(message: types.Message):
 async def set_city(message: types.Message):
     await send_sql(
         "INSERT INTO logs (`chat_id`,`username`,`message`,`upd`) VALUES ('{0}','{1}','{2}',datetime('now'))".format(
-            message.chat.id, message.chat.username, message.text))
+            message.from_user.id, message.chat.username, message.text))
     # ----keyboard
     vote_region_cb = CallbackData('vote', 'action', 'amount')  # post:<action>:<amount>
     region_data = await get_data("SELECT id,name FROM region WHERE country_id=0 ORDER BY name")
@@ -58,11 +58,12 @@ async def set_city(message: types.Message):
         global city_dict
         city_data = await get_data("SELECT rowid,name FROM city WHERE region_id={} ORDER BY name".format(amount))
         city_dict = dict(city_data)
-        await send_sql(
-            "UPDATE users set region_id = '{0}' where chat_id='{1}'".format(
+        sql = "UPDATE users set region_id = '{0}' where chat_id='{1}'".format(
                 amount,
-                query.message.from_user.id
-            ))
+                message.from_user.id
+            )
+        print(sql)
+        await send_sql(sql)
         await bot.edit_message_text('Вы выбрали: {0}'.format(region_dict[amount]),
                                     query.from_user.id,
                                     query.message.message_id,
@@ -79,7 +80,7 @@ async def set_city(message: types.Message):
         await send_sql(
             "UPDATE users set city_id = '{0}' where chat_id={1}".format(
                 amount,
-                query.message.from_user.id
+                message.from_user.id
             ))
         await bot.edit_message_text('Вы выбрали: {0}, {1}'.format(query.message.text, city_dict[amount]),
                                     query.from_user.id,
