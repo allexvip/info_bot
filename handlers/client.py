@@ -60,7 +60,7 @@ async def set_city(message: types.Message):
         city_dict = dict(city_data)
         sql = "UPDATE users set region_id = '{0}' where chat_id='{1}'".format(
                 amount,
-                message.from_user.id
+                query.from_user.id
             )
         print(sql)
         await send_sql(sql)
@@ -80,7 +80,7 @@ async def set_city(message: types.Message):
         await send_sql(
             "UPDATE users set city_id = '{0}' where chat_id={1}".format(
                 amount,
-                message.from_user.id
+                query.from_user.id
             ))
         await bot.edit_message_text('Вы выбрали: {0}, {1}'.format(query.message.text, city_dict[amount]),
                                     query.from_user.id,
