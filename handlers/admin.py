@@ -84,7 +84,12 @@ async def send_users_count(message: types.Message):
                 JOIN region a ON a.id=b.region_id
                 ORDER BY cnt desc
            """
-        text = 'Кол-во пользователей по регионам:'
+
+        text = f'Кол-во пользователей по регионам:'
+        list = await get_region_users_count(con, cur)
+        for item in list:
+            text += '\n' + item + ':'
+
         list = await get_sql_first_column(sql)
         for item in list:
             text += '\n' + item

@@ -74,6 +74,13 @@ async def get_users_count(con, cur):
         list.append(str(item_a[0]))
     return list
 
+async def get_region_users_count(con, cur):
+    list = []
+    sql = "SELECT COUNT(*) 'all users' FROM users where region_id is not null"
+    a = await from_db(sql)
+    for item_a in a:
+        list.append(str(item_a[0]))
+    return list
 
 async def get_users_votes(project):
     list = []
