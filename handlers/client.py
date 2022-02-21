@@ -41,7 +41,7 @@ async def set_city(message: types.Message):
     region_dict = dict(region_data)
 
     def get_keyboard(dict, action):
-        urlkb = types.InlineKeyboardMarkup(row_width=2)
+        urlkb = types.InlineKeyboardMarkup(row_width=1)
         inline_buttons_list = []
         for key in dict.keys():
             inline_buttons_list.append(types.InlineKeyboardButton(dict[key],
