@@ -194,10 +194,17 @@ LIMIT 1""".format(project)
     LIMIT 1""".format(project, message.chat.id)
         a = await send_sql(sql)
         if not a:
-            flag_done = True
-    project_obj = await send_sql(
-        "select `desc` from projects where project_code in ('{0}') limit 1".format(project))
-    # project_desc = project_obj[0]
+            sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type FROM deps d
+               LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
+               WHERE v.dep_id IS null and person_type='deputat'
+               ORDER BY RANDOM()
+               LIMIT 1""".format(project, message.chat.id)
+            a = await send_sql(sql)
+            if not a:
+                flag_done = True
+        project_obj = await send_sql(
+            "select `desc` from projects where project_code in ('{0}') limit 1".format(project))
+        # project_desc = project_obj[0]
 
     if not flag_done:
         dep_id = str(a[0])
@@ -206,9 +213,10 @@ LIMIT 1""".format(project)
         person_type = str(a[3])
         if 'sf' in person_type:
             person_type_str = "Совет Федерации"
+            url_repson = "sf"
         else:
             person_type_str = "ГосДума"
-
+            url_repson = "dep"
         # ----keyboard
         vote_cb = CallbackData('vote', 'action', 'amount')  # post:<action>:<amount>
 
@@ -262,10 +270,10 @@ LIMIT 1""".format(project)
 
         text_appeal = """Разово скачайте файл законопроекта: https://vk.cc/c7LhIc
 
-Примерный текст обращения здесь: https://semfront.ru/prog/texter.php?case=alimentover&user={0}&face={1}
+Примерный текст обращения здесь: https://semfront.ru/prog/texter.php?to_person={2}&case=alimentover&user={0}&face={1}
 
 Выбираете тип 'Заявление' и обязательно приложите файл законопроекта к обращению.  """.format(
-            message.from_user.id, dep_name.replace(' ', '%20'))
+            message.from_user.id, dep_name.replace(' ', '%20'),url_repson)
         await message.answer(
             f"{dep_name} ({person_type_str})\n\n{text_appeal} \n\nПишем сюда: {link_send}\n\nПосле отправки пожалуйста нажмите кнопку 'Отправлено 👍' \n\n💡 как вставить текст /help"
             , reply_markup=get_keyboard(0))
