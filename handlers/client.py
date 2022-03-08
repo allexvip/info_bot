@@ -24,7 +24,8 @@ async def send_projects_list(message: types.Message):
 
     await message.answer("""Предлагаю написать:
 
- - 🔥 Заявление о внесении в ГД законопроекта о введении верхней границы алиментов жмите /alimentover
+ - 🔥 Заявление о внесении в ГД законопроекта о введении верхней границы алиментов жмите 
+ 👉 /alimentover
 
 💡 как вставить текст /help
  """)
@@ -123,7 +124,8 @@ async def send_welcome(message: types.Message):
 Я помогу подать обращение в Госдуму и Совету Федерации.
 
 Актуальные инициативы:
-- 🔥 Заявление о внесении в ГД законопроекта о введении верхней границы алиментов жмите /alimentover
+- 🔥 Заявление о внесении в ГД законопроекта о введении верхней границы алиментов жмите 
+👉 /alimentover
 
 💡 как вставить текст /help
 """)
@@ -132,7 +134,8 @@ async def send_welcome(message: types.Message):
         await set_city(message)
 
 
-""" - ‼️ Жалоба на законопроекты о введении уголовного наказания за частичную неуплату алиментов жмите /alijail """
+""" - ‼️ Жалоба на законопроекты о введении уголовного наказания за частичную неуплату алиментов жмите 
+👉 /alijail """
 
 
 @dp.message_handler(commands=['help'])
@@ -148,7 +151,7 @@ https://youtu.be/hVAcztBylIc
 Ещё инструкция (универсальная) по вставке текста:
 https://vinadm.blogspot.com/2017/04/chrome-letterskremlinru.html
 
-Жмите /start""")
+Жмите 👉  /start""")
 
 
 @dp.message_handler(commands=['get_unconfirmed_votes', 'get_uv'])
@@ -186,25 +189,33 @@ ORDER BY RANDOM()
 LIMIT 1""".format(project)
     a = await send_sql(sql)
     if not a:
-        """ if all deps already used for first round then we use individual dep for user"""
+        """ regional deps for user"""
         sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type FROM deps d
-    LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
-    WHERE v.dep_id IS null and person_type='sf'
-    ORDER BY RANDOM()
-    LIMIT 1""".format(project, message.chat.id)
+        JOIN users u ON u.chat_id='{1}' AND d.region_id=u.region_id
+        LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
+        WHERE v.dep_id IS NULL and person_type='deputat'
+        ORDER BY RANDOM() LIMIT 1""".format(project, message.chat.id)
         a = await send_sql(sql)
         if not a:
+            """ if all deps already used for first round then we use individual dep for user"""
             sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type FROM deps d
-               LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
-               WHERE v.dep_id IS null and person_type='deputat'
-               ORDER BY RANDOM()
-               LIMIT 1""".format(project, message.chat.id)
+        LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
+        WHERE v.dep_id IS null and person_type='sf'
+        ORDER BY RANDOM()
+        LIMIT 1""".format(project, message.chat.id)
             a = await send_sql(sql)
             if not a:
-                flag_done = True
-        project_obj = await send_sql(
-            "select `desc` from projects where project_code in ('{0}') limit 1".format(project))
-        # project_desc = project_obj[0]
+                sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type FROM deps d
+                   LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
+                   WHERE v.dep_id IS null and person_type='deputat'
+                   ORDER BY RANDOM()
+                   LIMIT 1""".format(project, message.chat.id)
+                a = await send_sql(sql)
+                if not a:
+                    flag_done = True
+            project_obj = await send_sql(
+                "select `desc` from projects where project_code in ('{0}') limit 1".format(project))
+            # project_desc = project_obj[0]
 
     if not flag_done:
         dep_id = str(a[0])
@@ -299,7 +310,8 @@ async def write_command(message: types.Message):
             dep_id))
     await message.answer("""✅ Пометил у себя. Спасибо за Ваше участие! 🙂 Вместе мы сила! 💪💪💪
 
-Чтобы ещё написать другому парламентарию нажмите: /{0} .
+Чтобы ещё написать другому парламентарию нажмите: 
+👉 /{0} .
 
 Список актуальных инициатив /start""".format(project_code))
 
