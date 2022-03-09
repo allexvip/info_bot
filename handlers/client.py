@@ -182,40 +182,46 @@ async def send_project_info(message: types.Message):
     # write projects content
     flag_done = False
     project = message.text.replace('/', '')
-    sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type FROM deps d
-LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}'
-WHERE v.dep_id IS null
-ORDER BY RANDOM()
-LIMIT 1""".format(project)
+    sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type 
+FROM deps d
+LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
+WHERE v.dep_id IS NULL and "dep" LIKE '%Останина%' LIMIT 1""".format(project, message.chat.id)
     a = await send_sql(sql)
     if not a:
-        """ regional deps for user"""
         sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type FROM deps d
-        JOIN users u ON u.chat_id='{1}' AND d.region_id=u.region_id
-        LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
-        WHERE v.dep_id IS NULL and person_type='deputat'
-        ORDER BY RANDOM() LIMIT 1""".format(project, message.chat.id)
+    LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}'
+    WHERE v.dep_id IS null
+    ORDER BY RANDOM()
+    LIMIT 1""".format(project)
         a = await send_sql(sql)
         if not a:
-            """ if all deps already used for first round then we use individual dep for user"""
+            """ regional deps for user"""
             sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type FROM deps d
-        LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
-        WHERE v.dep_id IS null and person_type='sf'
-        ORDER BY RANDOM()
-        LIMIT 1""".format(project, message.chat.id)
+            JOIN users u ON u.chat_id='{1}' AND d.region_id=u.region_id
+            LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
+            WHERE v.dep_id IS NULL and person_type='deputat'
+            ORDER BY RANDOM() LIMIT 1""".format(project, message.chat.id)
             a = await send_sql(sql)
             if not a:
+                """ if all deps already used for first round then we use individual dep for user"""
                 sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type FROM deps d
-                   LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
-                   WHERE v.dep_id IS null and person_type='deputat'
-                   ORDER BY RANDOM()
-                   LIMIT 1""".format(project, message.chat.id)
+            LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
+            WHERE v.dep_id IS null and person_type='sf'
+            ORDER BY RANDOM()
+            LIMIT 1""".format(project, message.chat.id)
                 a = await send_sql(sql)
                 if not a:
-                    flag_done = True
-            project_obj = await send_sql(
-                "select `desc` from projects where project_code in ('{0}') limit 1".format(project))
-            # project_desc = project_obj[0]
+                    sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type FROM deps d
+                       LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
+                       WHERE v.dep_id IS null and person_type='deputat'
+                       ORDER BY RANDOM()
+                       LIMIT 1""".format(project, message.chat.id)
+                    a = await send_sql(sql)
+                    if not a:
+                        flag_done = True
+                project_obj = await send_sql(
+                    "select `desc` from projects where project_code in ('{0}') limit 1".format(project))
+                # project_desc = project_obj[0]
 
     if not flag_done:
         dep_id = str(a[0])
