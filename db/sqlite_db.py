@@ -65,6 +65,13 @@ async def get_sql_first_column(sql):
         list.append(str(item_a[0]))
     return list
 
+async def get_sql_one_value(sql):
+    list = []
+    a = await from_db(sql)
+    #print(a)
+    for item_a in a:
+        list.append(str(item_a[0]))
+    return list[0]
 
 async def get_users_count(con, cur):
     list = []
@@ -72,7 +79,7 @@ async def get_users_count(con, cur):
     a = await from_db(sql)
     for item_a in a:
         list.append(str(item_a[0]))
-    return list
+    return list[0]
 
 async def get_region_users_count(con, cur):
     list = []
@@ -80,7 +87,7 @@ async def get_region_users_count(con, cur):
     a = await from_db(sql)
     for item_a in a:
         list.append(str(item_a[0]))
-    return list
+    return list[0]
 
 async def get_users_votes(project):
     list = []

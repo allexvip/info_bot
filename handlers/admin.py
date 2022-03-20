@@ -32,6 +32,8 @@ async def send_admin_info(message: types.Message):
 
 /total - всего обращений
 
+/stat {project_name} - статистика обращений по инициативе
+
 /appeals_rate_sf - обращения в Совет Ферации
 
 /appeals_rate_dep - обращения в Госдуму 
@@ -50,6 +52,40 @@ async def send_admin_info(message: types.Message):
 
 {любой текст более 15 символов} - пересылка сообщения в чат поддержки
         """)
+
+@dp.message_handler(commands=['stat'])
+async def send_df(message: types.Message):
+    if message.from_user.id in admin_chatid_list:
+        if ' ' in message.text:
+            arg_list = message.text.split(' ')
+            project_info = await get_sql_one_value("SELECT name from projects where project_code in ('{0}');".format(arg_list[1]))
+            users_count_all = await get_users_count(con, cur)
+            users_count_regions = await get_region_users_count(con, cur)
+            appeals_count_deps = await get_sql_one_value(
+                """SELECT COUNT(*) AS 'cnt'  FROM votes a
+        JOIN deps d ON d.rowid=a.dep_id AND d.person_type='deputat'
+        WHERE a.project_code='{0}' """.format(arg_list[1]))
+            appeals_count_sf = await get_sql_one_value(
+                """SELECT COUNT(*) AS 'cnt'  FROM votes a
+JOIN deps d ON d.rowid=a.dep_id AND d.person_type='sf'
+WHERE a.project_code='{0}' """.format(arg_list[1]))
+            await message.answer("""ℹ️Статистика по инициативе:
+            
+{0}
+            
+✅ Общее количество пользователей бота: {1}
+
+✅ Количество пользователей, указавших свой регион: {2}
+
+✅ Количество обращений по верхней границе в Госдуму : {3}
+
+✅ Количество обращений сенаторам Совета Федерации: {4} """.format(project_info,
+                                                                                              users_count_all,
+                                                                                              users_count_regions,
+                                                                                             appeals_count_deps,
+                                                                                             appeals_count_sf
+                                                                                              ))
+
 
 @dp.message_handler(commands=['df'])
 async def send_df(message: types.Message):
@@ -73,9 +109,7 @@ async def send_total(message: types.Message):
 async def send_users_count(message: types.Message):
     if message.from_user.id in admin_chatid_list:
         text = 'Общее количество пользователей:'
-        list = await get_users_count(con, cur)
-        for item in list:
-            text += '\n' + item
+        text += '\n' + await get_users_count(con, cur)
         await message.answer(text)
         # по регионам
         sql = """SELECT b.cnt||' '||a.name AS answ FROM (
@@ -86,9 +120,7 @@ async def send_users_count(message: types.Message):
            """
 
         text = f'Кол-во пользователей по регионам:'
-        list = await get_region_users_count(con, cur)
-        for item in list:
-            text += '\n' + item + ':'
+        text += '\nВсего ' + await get_region_users_count(con, cur) + ':'
 
         list = await get_sql_first_column(sql)
         for item in list:
