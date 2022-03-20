@@ -10,11 +10,10 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from aiogram.types.chat_member import ChatMember
 
-
-
 '''******************** Admin part ********************************'''
 
 ID = None
+
 
 # Получаем ID текущего модератора
 @dp.message_handler(commands=['moderator'], is_chat_admin=True)
@@ -24,6 +23,7 @@ async def make_changes_command(message: types.Message):
     await bot.send_message(message.from_user.id, 'Режим администрирования включен',
                            reply_markup=admin_kb.button_case_admin)
     await message.delete()
+
 
 @dp.message_handler(commands=['admin'])
 async def send_admin_info(message: types.Message):
@@ -53,14 +53,16 @@ async def send_admin_info(message: types.Message):
 {любой текст более 15 символов} - пересылка сообщения в чат поддержки
         """)
 
+
 @dp.message_handler(commands=['stat'])
 async def send_df(message: types.Message):
     if message.from_user.id in admin_chatid_list:
         if ' ' in message.text:
             cur_time = await current_time()
-            cur_time = cur_time.replace('-','.')
+            cur_time = cur_time.replace('-', '.')
             arg_list = message.text.split(' ')
-            project_info = await get_sql_one_value("SELECT name from projects where project_code in ('{0}');".format(arg_list[1]))
+            project_info = await get_sql_one_value(
+                "SELECT name from projects where project_code in ('{0}');".format(arg_list[1]))
             users_count_all = await get_users_count(con, cur)
             users_count_regions = await get_region_users_count(con, cur)
             appeals_count_deps = await get_sql_one_value(
@@ -81,13 +83,16 @@ WHERE a.project_code='{0}' """.format(arg_list[1]))
 
 ✅ Количество обращений в Госдуму : {3}
 
-✅ Количество обращений сенаторам Совета Федерации: {4} """.format(project_info,
-                                                                                              users_count_all,
-                                                                                              users_count_regions,
-                                                                                             appeals_count_deps,
-                                                                                             appeals_count_sf,
-                                                                  cur_time
-                                                                                              ))
+✅ Количество обращений сенаторам Совета Федерации: {4} 
+
+https://t.me/{6}""".format(project_info,
+                           users_count_all,
+                           users_count_regions,
+                           appeals_count_deps,
+                           appeals_count_sf,
+                           cur_time,
+                           BOT_NAME
+                           ))
 
 
 @dp.message_handler(commands=['df'])
@@ -103,7 +108,7 @@ async def send_total(message: types.Message):
     if message.from_user.id in admin_chatid_list:
         cur_time = await current_time()
         total_str = await get_total_text(
-                                         "SELECT project_code,(SELECT b.name FROM projects b where b.project_code=a.project_code) AS 'project_name',COUNT(*) AS 'all votes',COUNT(DISTINCT `dep_id`) AS 'unique deps',COUNT(DISTINCT `chat_id`) AS 'unique users'  FROM votes a where `project_code`<>'' GROUP BY project_code")
+            "SELECT project_code,(SELECT b.name FROM projects b where b.project_code=a.project_code) AS 'project_name',COUNT(*) AS 'all votes',COUNT(DISTINCT `dep_id`) AS 'unique deps',COUNT(DISTINCT `chat_id`) AS 'unique users'  FROM votes a where `project_code`<>'' GROUP BY project_code")
         await message.answer(
             """Статистика по обращениям к парламентариям по состоянию на {0}{1} """.format(cur_time, total_str))
 
@@ -130,6 +135,7 @@ async def send_users_count(message: types.Message):
             text += '\n' + item
         await message.answer(text)
 
+
 @dp.message_handler(commands=['last_votes'])
 async def send_last_votes(message: types.Message):
     if message.from_user.id in admin_chatid_list:
@@ -140,11 +146,10 @@ async def send_last_votes(message: types.Message):
     ORDER BY v.upd DESC LIMIT 10
     """
         text = 'Последние голоса:'
-        list = await get_sql_first_column( sql)
+        list = await get_sql_first_column(sql)
         for item in list:
             text += '\n\n' + item
         await message.answer(text)
-
 
 
 @dp.message_handler(commands=['no_active_users'])
@@ -156,7 +161,7 @@ SELECT a.chat_id,a.message,max(a.upd),group_concat(message) as msg,COUNT(*) AS '
 ) b ON b.chat_id=u.chat_id
     """
         text = 'Неактивные пользователи:'
-        list = await get_sql_first_column( sql)
+        list = await get_sql_first_column(sql)
         for item in list:
             text += '\n\n' + item
         await send_full_text(message.chat.id, text)
@@ -169,14 +174,14 @@ async def send_appeals_rate_sf(message: types.Message):
 
         sql = "SELECT COUNT(DISTINCT a.chat_id) AS 'cnt'  FROM votes a WHERE a.dep_id>448 and a.project_code='alimentover'"
         text += """Пользователей написавших в Совет Федерации: """
-        list = await get_sql_first_column( sql)
+        list = await get_sql_first_column(sql)
         text += list[0]
 
         sql = """SELECT COUNT(*) AS 'cnt'  FROM votes a
 JOIN deps d ON d.rowid=a.dep_id AND d.person_type='sf'
 WHERE a.project_code='alimentover' """
         text += """\nВсего обращений сенаторам Совета Федерации: """
-        list = await get_sql_first_column( sql)
+        list = await get_sql_first_column(sql)
         text += list[0]
         # await send_full_text(message.from_user.id, text)
 
@@ -187,7 +192,7 @@ WHERE a.project_code='alimentover' """
         WHERE d.person_type IN ('sf') ORDER BY `cnt` desc """
         text = """Статистика обращений по сенаторам Совета Федерации:
 Кол-во обращений парламентарию СФ: """
-        list = await get_sql_first_column( sql)
+        list = await get_sql_first_column(sql)
         for item in list:
             text += '\n' + item
         await send_full_text(message.from_user.id, text)  # message.answer(text)
@@ -200,14 +205,14 @@ async def send_appeals_rate_dep(message: types.Message):
 
         sql = "SELECT COUNT(DISTINCT a.chat_id) AS 'cnt'  FROM votes a WHERE a.dep_id<448 and a.project_code='alimentover'"
         text += """Пользователей написавших в Госдуму: """
-        list = await get_sql_first_column( sql)
+        list = await get_sql_first_column(sql)
         text += list[0]
 
         sql = """SELECT COUNT(*) AS 'cnt'  FROM votes a
         JOIN deps d ON d.rowid=a.dep_id AND d.person_type='deputat'
         WHERE a.project_code='alimentover' """
         text += """\nВсего обращений в Госдуму: """
-        list = await get_sql_first_column( sql)
+        list = await get_sql_first_column(sql)
         text += list[0]
         await send_full_text(message.from_user.id, text)
 
@@ -215,10 +220,11 @@ async def send_appeals_rate_dep(message: types.Message):
     JOIN (SELECT a.dep_id,COUNT(*) AS cnt FROM votes a GROUP BY a.dep_id) b ON d.rowid=b.dep_id
     WHERE d.person_type IN ('deputat') ORDER BY `cnt` desc """
         text = 'Кол-во обращений парламентарию СФ:'
-        list = await get_sql_first_column( sql)
+        list = await get_sql_first_column(sql)
         for item in list:
             text += '\n' + item
         await send_full_text(message.from_user.id, text)  # message.answer(text)
+
 
 @dp.message_handler(lambda message: '/send ' in message.text)
 async def send_to_user(message: types.Message):
@@ -229,7 +235,7 @@ async def send_to_user(message: types.Message):
             data_list = msg.split('/send ')[1].split('|')
             to_chat_id = data_list[0]
             message_for_user = data_list[1]
-            #print(to_chat_id + ' ' + message_for_user)
+            # print(to_chat_id + ' ' + message_for_user)
             try:
                 await bot.send_message(to_chat_id, message_for_user)
                 await message.answer('Отправлено пользователю: ' + str(to_chat_id))
@@ -270,7 +276,7 @@ async def send_to_start_users(message: types.Message):
     if message.from_user.id in admin_chatid_list:
         message_for_users = message.text.replace('/send_to_start_users ', '')
         sql = """SELECT a.chat_id,a.message,max(a.upd) FROM logs a GROUP BY a.chat_id HAVING message IN ('/start') """
-        chat_id_list = await get_sql_first_column( sql)
+        chat_id_list = await get_sql_first_column(sql)
         for item_chat_id in chat_id_list:
             print(item_chat_id + ' ' + message_for_users)
             # await bot.send_message(80387796, '/send_all :\n'+item_chat_id+'\n' + message_for_users)
@@ -284,6 +290,7 @@ async def send_to_start_users(message: types.Message):
         await send_full_text(80387796, text_err)
     else:
         await message.answer('Ничего не понял. Помощь /help')
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - -
 
