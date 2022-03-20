@@ -57,6 +57,7 @@ async def send_admin_info(message: types.Message):
 async def send_df(message: types.Message):
     if message.from_user.id in admin_chatid_list:
         if ' ' in message.text:
+            cur_time = await current_time()
             arg_list = message.text.split(' ')
             project_info = await get_sql_one_value("SELECT name from projects where project_code in ('{0}');".format(arg_list[1]))
             users_count_all = await get_users_count(con, cur)
@@ -69,7 +70,7 @@ async def send_df(message: types.Message):
                 """SELECT COUNT(*) AS 'cnt'  FROM votes a
 JOIN deps d ON d.rowid=a.dep_id AND d.person_type='sf'
 WHERE a.project_code='{0}' """.format(arg_list[1]))
-            await message.answer("""ℹ️ Статистика по инициативе:
+            await message.answer("""ℹ️ Статистика на {5} (МСК) по инициативе:
             
 {0}
             
@@ -83,7 +84,8 @@ WHERE a.project_code='{0}' """.format(arg_list[1]))
                                                                                               users_count_all,
                                                                                               users_count_regions,
                                                                                              appeals_count_deps,
-                                                                                             appeals_count_sf
+                                                                                             appeals_count_sf,
+                                                                  cur_time
                                                                                               ))
 
 
