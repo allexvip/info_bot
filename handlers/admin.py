@@ -73,7 +73,9 @@ async def send_df(message: types.Message):
                 """SELECT COUNT(*) AS 'cnt'  FROM votes a
 JOIN deps d ON d.rowid=a.dep_id AND d.person_type='sf'
 WHERE a.project_code='{0}' """.format(arg_list[1]))
-            await message.answer("""ℹ️ Статистика на {5} (МСК) по инициативе:
+            await message.answer("""https://t.me/{6}
+            
+ℹ️ Статистика на {5} (МСК) по инициативе:
             
 {0}
             
