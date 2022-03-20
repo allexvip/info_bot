@@ -58,6 +58,7 @@ async def send_df(message: types.Message):
     if message.from_user.id in admin_chatid_list:
         if ' ' in message.text:
             cur_time = await current_time()
+            cur_time = cur_time.replace('-','.')
             arg_list = message.text.split(' ')
             project_info = await get_sql_one_value("SELECT name from projects where project_code in ('{0}');".format(arg_list[1]))
             users_count_all = await get_users_count(con, cur)
