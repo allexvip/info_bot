@@ -132,7 +132,6 @@ async def from_db(sql):
     if sql.lower()[0:6] == 'select':
         return res.fetchall()
 
-
 async def send_sql(sql):
     res = ''
     try:

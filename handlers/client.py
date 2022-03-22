@@ -27,7 +27,11 @@ async def send_projects_list(message: types.Message):
  - 🔥 Заявление о внесении в ГД законопроекта о введении верхней границы алиментов жмите 
  👉 /alimentover
 
+- 🔥 Совместное воспитание 
+👉 /coparenting
+
 💡 как вставить текст /help
+
  """)
 
 
@@ -51,7 +55,9 @@ async def set_city(message: types.Message):
         urlkb.add(*inline_buttons_list)
         return urlkb
 
-    await message.answer('Для совместных походов к народным избранникам в регионах нам нужно чтобы Вы выбрали Ваш регион:', reply_markup=get_keyboard(region_dict, 'region'))
+    await message.answer(
+        'Для совместных походов к народным избранникам в регионах нам нужно чтобы Вы выбрали Ваш регион:',
+        reply_markup=get_keyboard(region_dict, 'region'))
 
     @dp.callback_query_handler(vote_region_cb.filter(action='region'))
     async def vote_up_cb_handler(query: types.CallbackQuery, callback_data: dict):
@@ -60,16 +66,17 @@ async def set_city(message: types.Message):
         city_data = await get_data("SELECT rowid,name FROM city WHERE region_id={} ORDER BY name".format(amount))
         city_dict = dict(city_data)
         sql = "UPDATE users set region_id = '{0}' where chat_id='{1}'".format(
-                amount,
-                query.from_user.id
-            )
+            amount,
+            query.from_user.id
+        )
         logging.info(f'{query.from_user.id} region_id: {amount}')
         await send_sql(sql)
         await bot.edit_message_text('Вы выбрали: {0}'.format(region_dict[amount]),
                                     query.from_user.id,
                                     query.message.message_id,
                                     reply_markup=None)
-        await query.message.answer('Спасибо! 👍 Пока выбираем регион, в будущем добавим города.\n\nЧтобы исправить Ваш регион - используйте /set_city')
+        await query.message.answer(
+            'Спасибо! 👍 Пока выбираем регион, в будущем добавим города.\n\nЧтобы исправить Ваш регион - используйте /set_city')
         await send_projects_list(query.message)
         # await bot.edit_message_text('{}'.format(region_dict[amount]), query.from_user.id,
         #                             query.message.message_id,
@@ -127,6 +134,9 @@ async def send_welcome(message: types.Message):
 - 🔥 Заявление о внесении в ГД законопроекта о введении верхней границы алиментов жмите 
 👉 /alimentover
 
+- 🔥 Совместное воспитание 
+👉 /coparenting
+
 💡 как вставить текст /help
 """)
     res = await get_data("select region_id from users where chat_id = {} limit 1".format(message.from_user.id))
@@ -182,15 +192,24 @@ async def send_project_info(message: types.Message):
     # write projects content
     flag_done = False
     project = message.text.replace('/', '')
-    sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type 
-FROM deps d
-LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
-WHERE v.dep_id IS NULL and "dep" LIKE '%Останина%' LIMIT 1""".format(project, message.chat.id)
+    print(project)
+    if project == 'coparenting':
+        sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type
+                    FROM deps d
+                    LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
+                    WHERE  "dep" LIKE  '%Бастрыкин%' and v.dep_id IS NULL  LIMIT 1""".format(project, message.chat.id)
+    else:
+        sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type 
+                    FROM deps d
+                    LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
+                    WHERE  "dep" LIKE  '%Останина%'  AND d."dep" not LIKE  '%Бастрыкин%' and v.dep_id IS NULL  LIMIT 1""".format(project, message.chat.id)
+
+
     a = await send_sql(sql)
     if not a:
         sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type FROM deps d
     LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}'
-    WHERE v.dep_id IS null
+    WHERE v.dep_id IS null AND d."dep" not LIKE  '%Бастрыкин%'
     ORDER BY RANDOM()
     LIMIT 1""".format(project)
         a = await send_sql(sql)
@@ -228,7 +247,10 @@ WHERE v.dep_id IS NULL and "dep" LIKE '%Останина%' LIMIT 1""".format(pro
         dep_name = str(a[1])
         link_send = str(a[2])
         person_type = str(a[3])
-        if 'sf' in person_type:
+        if 'sk' in person_type:
+            person_type_str = "Следственный комитет"
+            url_repson = "sk"
+        elif 'sf' in person_type:
             person_type_str = "Совет Федерации"
             url_repson = "sf"
         else:
@@ -284,15 +306,19 @@ WHERE v.dep_id IS NULL and "dep" LIKE '%Останина%' LIMIT 1""".format(pro
                                         reply_markup=get_keyboard(amount))
 
         # ----keyboard end
-
-        text_appeal = """Разово скачайте файл законопроекта: https://vk.cc/c7LhIc
-
-Примерный текст обращения здесь: https://semfront.ru/prog/texter.php?to_person={2}&case=alimentover&user={0}&face={1}
-
-Выбираете тип 'Заявление' и обязательно приложите файл законопроекта к обращению.  """.format(
-            message.from_user.id, dep_name.replace(' ', '%20'),url_repson)
+        project_desc = await get_sql_one_value(
+            "SELECT desc from projects where project_code in ('{0}');".format(project))
+        text_appeal = """{3}
+Примерный текст обращения здесь: https://semfront.ru/prog/texter.php?to_person={2}&case={4}&user={0}&face={1}
+""".format(
+            message.from_user.id,
+            dep_name.replace(' ', '%20'),
+            url_repson,
+            project_desc,
+            project
+        )
         await message.answer(
-            f"{dep_name} ({person_type_str})\n\n{text_appeal} \n\nПишем сюда: {link_send}\n\nПосле отправки пожалуйста нажмите кнопку 'Отправлено 👍' \n\n💡 как вставить текст /help"
+            f"{dep_name} ({person_type_str})\n{text_appeal} \nПишем сюда: {link_send}\n\nПосле отправки пожалуйста нажмите кнопку 'Отправлено 👍' \n\n💡 как вставить текст /help"
             , reply_markup=get_keyboard(0))
     else:
         await message.answer("""✅ Спасибо Вам за то, что вы отправили обращения всем парламентариям! 💪💪💪 
