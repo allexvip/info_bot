@@ -84,6 +84,7 @@ WHERE a.project_code='{0}' """.format(arg_list[1]))
 ✅ Количество обращений в Госдуму: {appeals_count_deps}"""
             if int(appeals_count_sf) > 0:
                 text += f"""
+                
 ✅ Количество обращений сенаторам Совета Федерации: {appeals_count_sf}"""
             if int(appeals_count_sk) > 0:
                 text += f"""
