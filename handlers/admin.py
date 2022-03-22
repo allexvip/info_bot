@@ -73,6 +73,10 @@ async def send_df(message: types.Message):
                 """SELECT COUNT(*) AS 'cnt'  FROM votes a
 JOIN deps d ON d.rowid=a.dep_id AND d.person_type='sf'
 WHERE a.project_code='{0}' """.format(arg_list[1]))
+            appeals_count_sk = await get_sql_one_value(
+                """SELECT COUNT(*) AS 'cnt'  FROM votes a
+JOIN deps d ON d.rowid=a.dep_id AND d.person_type='sk'
+WHERE a.project_code='{0}' """.format(arg_list[1]))
             await message.answer("""https://t.me/{6}
             
 ℹ️ Статистика на {5} (МСК) по инициативе:
@@ -87,13 +91,16 @@ WHERE a.project_code='{0}' """.format(arg_list[1]))
 
 ✅ Количество обращений сенаторам Совета Федерации: {4} 
 
+✅ Количество обращений Бастрыкину: {7} 
+
 https://t.me/{6}""".format(project_info,
                            users_count_all,
                            users_count_regions,
                            appeals_count_deps,
                            appeals_count_sf,
                            cur_time,
-                           BOT_NAME
+                           BOT_NAME,
+                           appeals_count_sk
                            ))
 
 
