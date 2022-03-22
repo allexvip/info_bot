@@ -307,8 +307,11 @@ async def send_project_info(message: types.Message):
         # ----keyboard end
         project_desc = await get_sql_one_value(
             "SELECT desc from projects where project_code in ('{0}');".format(project))
-        text_appeal = """{3}
-Примерный текст обращения здесь: https://semfront.ru/prog/texter.php?to_person={2}&case={4}&user={0}&face={1}
+        text_appeal = """
+{3}
+        
+Примерный текст обращения здесь: 👇👇👇 
+https://semfront.ru/prog/texter.php?to_person={2}&case={4}&user={0}&face={1}
 """.format(
             message.from_user.id,
             dep_name.replace(' ', '%20'),
@@ -317,7 +320,7 @@ async def send_project_info(message: types.Message):
             project
         )
         await message.answer(
-            f"{dep_name} ({person_type_str})\n{text_appeal} \nПишем сюда: {link_send}\n\nПосле отправки пожалуйста нажмите кнопку 'Отправлено 👍' \n\n💡 как вставить текст /help"
+            f"{dep_name} ({person_type_str})\n{text_appeal} \nПишем сюда: 👉 {link_send}\n\nПосле отправки пожалуйста нажмите кнопку 'Отправлено 👍' \n\n💡 как вставить текст /help"
             , reply_markup=get_keyboard(0))
     else:
         await message.answer("""✅ Спасибо Вам за то, что вы отправили обращения всем парламентариям! 💪💪💪 
