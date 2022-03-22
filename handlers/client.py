@@ -192,7 +192,6 @@ async def send_project_info(message: types.Message):
     # write projects content
     flag_done = False
     project = message.text.replace('/', '')
-    print(project)
     if project == 'coparenting':
         sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type
                     FROM deps d
