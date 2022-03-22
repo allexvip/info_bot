@@ -28,7 +28,7 @@ async def send_projects_list(message: types.Message):
  👉 /alimentover
 
 - 🔥 Совместное воспитание 
-👉 /coparenting
+👉 /copb
 
 💡 как вставить текст /help
 
@@ -135,7 +135,7 @@ async def send_welcome(message: types.Message):
 👉 /alimentover
 
 - 🔥 Совместное воспитание 
-👉 /coparenting
+👉 /copb
 
 💡 как вставить текст /help
 """)
@@ -192,54 +192,56 @@ async def send_project_info(message: types.Message):
     # write projects content
     flag_done = False
     project = message.text.replace('/', '')
-    if project == 'coparenting':
+    if project == 'copb':
         sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type
                     FROM deps d
                     LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
                     WHERE  "dep" LIKE  '%Бастрыкин%' and v.dep_id IS NULL  LIMIT 1""".format(project, message.chat.id)
+
+        a = await send_sql(sql)
+        if not a:
+            flag_done = True
     else:
         sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type 
                     FROM deps d
                     LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
                     WHERE  "dep" LIKE  '%Останина%'  AND d."dep" not LIKE  '%Бастрыкин%' and v.dep_id IS NULL  LIMIT 1""".format(project, message.chat.id)
-
-
-    a = await send_sql(sql)
-    if not a:
-        sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type FROM deps d
-    LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}'
-    WHERE v.dep_id IS null AND d."dep" not LIKE  '%Бастрыкин%'
-    ORDER BY RANDOM()
-    LIMIT 1""".format(project)
         a = await send_sql(sql)
         if not a:
-            """ regional deps for user"""
             sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type FROM deps d
-            JOIN users u ON u.chat_id='{1}' AND d.region_id=u.region_id
-            LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
-            WHERE v.dep_id IS NULL and person_type='deputat'
-            ORDER BY RANDOM() LIMIT 1""".format(project, message.chat.id)
+        LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}'
+        WHERE v.dep_id IS null AND d."dep" and person_type in('deputat','sf')
+        ORDER BY RANDOM()
+        LIMIT 1""".format(project)
             a = await send_sql(sql)
             if not a:
-                """ if all deps already used for first round then we use individual dep for user"""
+                """ regional deps for user"""
                 sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type FROM deps d
-            LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
-            WHERE v.dep_id IS null and person_type='sf'
-            ORDER BY RANDOM()
-            LIMIT 1""".format(project, message.chat.id)
+                JOIN users u ON u.chat_id='{1}' AND d.region_id=u.region_id
+                LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
+                WHERE v.dep_id IS NULL and person_type='deputat'
+                ORDER BY RANDOM() LIMIT 1""".format(project, message.chat.id)
                 a = await send_sql(sql)
                 if not a:
+                    """ if all deps already used for first round then we use individual dep for user"""
                     sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type FROM deps d
-                       LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
-                       WHERE v.dep_id IS null and person_type='deputat'
-                       ORDER BY RANDOM()
-                       LIMIT 1""".format(project, message.chat.id)
+                LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
+                WHERE v.dep_id IS null and person_type='sf'
+                ORDER BY RANDOM()
+                LIMIT 1""".format(project, message.chat.id)
                     a = await send_sql(sql)
                     if not a:
-                        flag_done = True
-                project_obj = await send_sql(
-                    "select `desc` from projects where project_code in ('{0}') limit 1".format(project))
-                # project_desc = project_obj[0]
+                        sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type FROM deps d
+                           LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
+                           WHERE v.dep_id IS null and person_type='deputat'
+                           ORDER BY RANDOM()
+                           LIMIT 1""".format(project, message.chat.id)
+                        a = await send_sql(sql)
+                        if not a:
+                            flag_done = True
+                    project_obj = await send_sql(
+                        "select `desc` from projects where project_code in ('{0}') limit 1".format(project))
+                    # project_desc = project_obj[0]
 
     if not flag_done:
         dep_id = str(a[0])
@@ -323,7 +325,7 @@ https://semfront.ru/prog/texter.php?to_person={2}&case={4}&user={0}&face={1}
             f"{dep_name} ({person_type_str})\n{text_appeal} \nПишем сюда: 👉 {link_send}\n\nПосле отправки пожалуйста нажмите кнопку 'Отправлено 👍' \n\n💡 как вставить текст /help"
             , reply_markup=get_keyboard(0))
     else:
-        await message.answer("""✅ Спасибо Вам за то, что вы отправили обращения всем парламентариям! 💪💪💪 
+        await message.answer("""✅ Спасибо Вам за то, что вы отправили обращения! 💪💪💪 
     Список актуальных инициатив /start
                          """)
 
