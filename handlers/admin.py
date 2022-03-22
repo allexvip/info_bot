@@ -77,30 +77,35 @@ WHERE a.project_code='{0}' """.format(arg_list[1]))
                 """SELECT COUNT(*) AS 'cnt'  FROM votes a
 JOIN deps d ON d.rowid=a.dep_id AND d.person_type='sk'
 WHERE a.project_code='{0}' """.format(arg_list[1]))
-            await message.answer("""https://t.me/{6}
+
+            text = ''
+            if int(appeals_count_deps) > 0:
+                text += f"""
+✅ Количество обращений в Госдуму: {appeals_count_deps}"""
+            if int(appeals_count_sf) > 0:
+                text += f"""
+✅ Количество обращений сенаторам Совета Федерации: {appeals_count_sf}"""
+            if int(appeals_count_sk) > 0:
+                text += f"""
+✅ Количество обращений Бастрыкину: {appeals_count_sk}"""
+
+    await message.answer("""https://t.me/{4}
             
-ℹ️ Статистика на {5} (МСК) по инициативе:
+ℹ️ Статистика на {3} (МСК) по инициативе:
             
 {0}
             
 ✅ Общее количество пользователей бота: {1}
 
 ✅ Количество пользователей, указавших свой регион: {2}
+{5}
 
-✅ Количество обращений в Госдуму : {3}
-
-✅ Количество обращений сенаторам Совета Федерации: {4} 
-
-✅ Количество обращений Бастрыкину: {7} 
-
-https://t.me/{6}""".format(project_info,
+https://t.me/{4}""".format(project_info,
                            users_count_all,
                            users_count_regions,
-                           appeals_count_deps,
-                           appeals_count_sf,
                            cur_time,
                            BOT_NAME,
-                           appeals_count_sk
+                           text
                            ))
 
 
