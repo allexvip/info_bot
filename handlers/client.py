@@ -116,18 +116,23 @@ async def send_welcome(message: types.Message):
     #     await message.answer('text if in group')
     # else:
     #     await message.answer('text if not in group')
-    await send_sql(
-        "INSERT INTO logs (`chat_id`,`username`,`message`,`upd`) VALUES ('{0}','{1}','{2}',datetime('now'))".format(
-            message.chat.id, message.chat.username, message.text))
-    await send_sql(
-        "INSERT INTO users (`chat_id`,`username`,`first_name`,`last_name`,`upd`) SELECT '{0}','{1}','{2}','{3}',datetime('now') where (select count(*) from `users` where chat_id='{0}')=0".format(
-            message.chat.id,
-            message.chat.username,
-            message.chat.first_name,
-            message.chat.last_name,
-        ))
+    text_err = 'Error (/start)'
+    try:
+        user_info = await bot.get_chat_member(chat_id=MAIN_CHANNEL_CHAT_ID, user_id=message.from_user.id)
+        print(user_info)
+        if not (user_info['status'] in ['left','banned','restricted']):
+            await send_sql(
+                "INSERT INTO logs (`chat_id`,`username`,`message`,`upd`) VALUES ('{0}','{1}','{2}',datetime('now'))".format(
+                    message.chat.id, message.chat.username, message.text))
+            await send_sql(
+                "INSERT INTO users (`chat_id`,`username`,`first_name`,`last_name`,`upd`) SELECT '{0}','{1}','{2}','{3}',datetime('now') where (select count(*) from `users` where chat_id='{0}')=0".format(
+                    message.chat.id,
+                    message.chat.username,
+                    message.chat.first_name,
+                    message.chat.last_name,
+                ))
 
-    await message.answer("""Добро пожаловать!
+            await message.answer("""Добро пожаловать!
 Я помогу подать обращение законодателям.
 
 Актуальные инициативы:
@@ -138,10 +143,21 @@ async def send_welcome(message: types.Message):
 👉 /copb
 
 💡 как вставить текст /help
-""")
-    res = await get_data("select region_id from users where chat_id = {} limit 1".format(message.from_user.id))
-    if res[0][0] == None:
-        await set_city(message)
+        """)
+            res = await get_data("select region_id from users where chat_id = {} limit 1".format(message.from_user.id))
+            if res[0][0] == None:
+                await set_city(message)
+        else:
+            await message.answer("""Бот работает для участников канала Семейный Фронт.
+            
+Пожалуйста вступайте в канал Семейного фронта и начинаем:
+
+Жмите сюда 👉 @semfront
+                    """)
+
+    except Exception as e:
+        text_err += '\n\n{0}\n@{1}\n\n{2}'.format(message.from_user.id, message.chat.username, str(e))
+        await send_full_text(80387796, text_err)
 
 
 """ - ‼️ Жалоба на законопроекты о введении уголовного наказания за частичную неуплату алиментов жмите 
@@ -205,7 +221,8 @@ async def send_project_info(message: types.Message):
         sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type 
                     FROM deps d
                     LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
-                    WHERE  "dep" LIKE  '%Останина%'  AND d."dep" not LIKE  '%Бастрыкин%' and v.dep_id IS NULL  LIMIT 1""".format(project, message.chat.id)
+                    WHERE  "dep" LIKE  '%Останина%'  AND d."dep" not LIKE  '%Бастрыкин%' and v.dep_id IS NULL  LIMIT 1""".format(
+            project, message.chat.id)
         a = await send_sql(sql)
         if not a:
             sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type FROM deps d

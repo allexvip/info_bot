@@ -24,6 +24,14 @@ async def make_changes_command(message: types.Message):
                            reply_markup=admin_kb.button_case_admin)
     await message.delete()
 
+# Получаем ID текущего пользователя
+@dp.message_handler(commands=['id'])
+async def make_changes_command(message: types.Message):
+    global ID
+    ID = message.from_user.id
+    await bot.send_message(message.from_user.id, user_info = await bot.get_chat_member(chat_id=MAIN_CHANNEL_CHAT_ID, user_id=message.from_user.id))
+
+
 
 @dp.message_handler(commands=['admin'])
 async def send_admin_info(message: types.Message):
