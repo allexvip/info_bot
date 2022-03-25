@@ -118,20 +118,18 @@ async def send_welcome(message: types.Message):
     #     await message.answer('text if not in group')
     text_err = 'Error (/start)'
     try:
+        await send_sql(
+            "INSERT INTO logs (`chat_id`,`username`,`message`,`upd`) VALUES ('{0}','{1}','{2}',datetime('now'))".format(
+                message.chat.id, message.chat.username, message.text))
+        await send_sql(
+            "INSERT INTO users (`chat_id`,`username`,`first_name`,`last_name`,`upd`) SELECT '{0}','{1}','{2}','{3}',datetime('now') where (select count(*) from `users` where chat_id='{0}')=0".format(
+                message.chat.id,
+                message.chat.username,
+                message.chat.first_name,
+                message.chat.last_name,
+            ))
         user_info = await bot.get_chat_member(chat_id=MAIN_CHANNEL_CHAT_ID, user_id=message.from_user.id)
-        print(user_info)
-        if not (user_info['status'] in ['left','banned','restricted']):
-            await send_sql(
-                "INSERT INTO logs (`chat_id`,`username`,`message`,`upd`) VALUES ('{0}','{1}','{2}',datetime('now'))".format(
-                    message.chat.id, message.chat.username, message.text))
-            await send_sql(
-                "INSERT INTO users (`chat_id`,`username`,`first_name`,`last_name`,`upd`) SELECT '{0}','{1}','{2}','{3}',datetime('now') where (select count(*) from `users` where chat_id='{0}')=0".format(
-                    message.chat.id,
-                    message.chat.username,
-                    message.chat.first_name,
-                    message.chat.last_name,
-                ))
-
+        if not (user_info['status'] in ['left', 'banned', 'restricted']):
             await message.answer("""Добро пожаловать!
 Я помогу подать обращение законодателям.
 
@@ -148,9 +146,9 @@ async def send_welcome(message: types.Message):
             if res[0][0] == None:
                 await set_city(message)
         else:
-            await message.answer("""Бот работает для участников канала Семейный Фронт.
+            await message.answer("""Бот работает для участников канала "Семейный Фронт".
             
-Пожалуйста вступайте в канал Семейного фронта и начинаем:
+Пожалуйста вступайте в канал "Семейного Фронта" и возращайтесь назад в бота:
 
 Жмите сюда 👉 @semfront
                     """)
