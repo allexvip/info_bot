@@ -101,7 +101,6 @@ async def set_city(message: types.Message):
 
 @dp.message_handler(commands=['my_appeals'])
 async def send_my_appeals(message: types.Message):
-    await message.answer(str(message.chat.id) + '\n\n' + message.text)
     sql = "select count(*) from votes where chat_id='{0}'".format(message.from_user.id)
     text = 'Общее кол-во Ваших обращений о введении верхней границы алиментов: {0}\n'.format(await get_sql_one_value(sql))
     sql = """SELECT '✅' ||' '||dep  FROM votes a 
