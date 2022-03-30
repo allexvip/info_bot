@@ -89,12 +89,16 @@ async def get_region_users_count(con, cur):
         list.append(str(item_a[0]))
     return list[0]
 
-async def get_users_votes(project):
+async def get_users_votes(project,chat_id):
     list = []
     sql = """SELECT chat_id,project_code,group_concat(dep||' /'||b.rowid||'_'||project_code||'_minus '||' /'||b.rowid||'_'||project_code||'_plus', '\n') AS 'deps_string' FROM votes a 
 JOIN deps b ON b.rowid = a.dep_id
 WHERE a.project_code = 'alimentover' 
 GROUP BY chat_id,project_code,chat_id """
+    sql = """SELECT chat_id,project_code,group_concat(dep,'\n') AS 'deps_string' FROM votes a 
+    JOIN deps b ON b.rowid = a.dep_id
+    WHERE a.project_code = '{0}' and chat_id='{1}'
+    GROUP BY chat_id,project_code,chat_id""".format(project,chat_id)
     a = await from_db(sql)
     for item_a in a:
         inList = []

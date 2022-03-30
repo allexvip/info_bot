@@ -102,10 +102,9 @@ async def set_city(message: types.Message):
 @dp.message_handler(commands=['my_appeals'])
 async def send_my_appeals(message: types.Message):
     await message.answer(str(message.chat.id) + '\n\n' + message.text)
-    list = await get_users_votes('alijail')
+    list = await get_users_votes('alimentover',message.from_user.id)
     for item in list:
-        if item[0] == message.chat.id:
-            await message.answer('Вы писали:\n\n{}'.format(item[2]))
+        await message.answer('Вы писали:\n\n{}'.format(item[2]))
 
 
 @dp.message_handler(commands=['start'])
