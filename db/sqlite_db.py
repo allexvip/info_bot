@@ -96,13 +96,13 @@ JOIN deps b ON b.rowid = a.dep_id
 WHERE a.project_code = 'alimentover' 
 GROUP BY chat_id,project_code,chat_id """
     sql = """SELECT chat_id,project_code,group_concat(dep,'\n') AS 'deps_string' FROM votes a 
-    JOIN deps b ON b.rowid = a.dep_id
+    JOIN (select rowid,dep from deps order by dep) b ON b.rowid = a.dep_id
     WHERE a.project_code = '{0}' and chat_id='{1}'
-    GROUP BY chat_id,project_code,chat_id""".format(project,chat_id)
+    GROUP BY chat_id,project_code,chat_id """.format(project,chat_id)
     a = await from_db(sql)
     for item_a in a:
         inList = []
-        print(item_a)
+        #print(item_a)
         for item in item_a:
             inList.append(item)
         list.append(inList)

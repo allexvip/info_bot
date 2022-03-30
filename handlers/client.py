@@ -102,9 +102,16 @@ async def set_city(message: types.Message):
 @dp.message_handler(commands=['my_appeals'])
 async def send_my_appeals(message: types.Message):
     await message.answer(str(message.chat.id) + '\n\n' + message.text)
-    list = await get_users_votes('alimentover',message.from_user.id)
+    sql = "select count(*) from votes where chat_id='{0}'".format(message.from_user.id)
+    text = 'Общее кол-во Ваших обращений о введении верхней границы алиментов: {0}\n'.format(await get_sql_one_value(sql))
+    sql = """SELECT '✅' ||' '||dep  FROM votes a 
+JOIN (select rowid,dep from deps order by dep) b ON b.rowid = a.dep_id
+WHERE a.project_code = 'alimentover' and chat_id='{0}'
+order by dep """.format(message.from_user.id)
+    list = await get_sql_first_column(sql)
     for item in list:
-        await message.answer('Вы писали:\n\n{}'.format(item[2]))
+        text += '\n' + item
+    await message.answer(text)
 
 
 @dp.message_handler(commands=['start'])
@@ -133,7 +140,7 @@ async def send_welcome(message: types.Message):
 Я помогу подать обращение законодателям.
 
 Актуальные инициативы:
-- 🔥 Заявление о внесении в ГД законопроекта о введении верхней границы алиментов жмите 
+- 🔥 Заявление о внесении в ГД законопроекта о введении верхней границы алиментов 
 👉 /alimentover
 
 - 🔥 Совместное воспитание - письмо Бастрыкину
@@ -157,7 +164,7 @@ async def send_welcome(message: types.Message):
         await send_full_text(80387796, text_err)
 
 
-""" - ‼️ Жалоба на законопроекты о введении уголовного наказания за частичную неуплату алиментов жмите 
+""" - ‼️ Жалоба на законопроекты о введении уголовного наказания за частичную неуплату алиментов 
 👉 /alijail """
 
 
