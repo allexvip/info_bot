@@ -29,6 +29,7 @@ async def make_changes_command(message: types.Message):
 async def send_admin_info(message: types.Message):
     if message.from_user.id in admin_chatid_list:
         await message.answer("""Команды администратора:
+        
 /top_users - ТОП пользователей
 
 /total - всего обращений
