@@ -133,7 +133,7 @@ async def from_db(sql):
     except Exception as e:
         logging.info('SQL exception' + str(e))
 
-    if sql.lower()[0:6] == 'select':
+    if sql.lower()[0:6] == 'select' or sql.lower()[0:4] == 'with':
         return res.fetchall()
 
 async def send_sql(sql):

@@ -29,6 +29,7 @@ async def make_changes_command(message: types.Message):
 async def send_admin_info(message: types.Message):
     if message.from_user.id in admin_chatid_list:
         await message.answer("""Команды администратора:
+/top_users - ТОП пользователей
 
 /total - всего обращений
 
@@ -150,6 +151,27 @@ async def send_users_count(message: types.Message):
             text += '\n' + item
         await message.answer(text)
 
+@dp.message_handler(commands=['top_users'])
+async def send_last_votes(message: types.Message):
+    if message.from_user.id in admin_chatid_list:
+        sql = """with aa AS (SELECT v.chat_id,COUNT(*) AS cnt FROM votes v WHERE v.project_code='alimentover' GROUP BY v.chat_id HAVING cnt>20)
+SELECT 
+iif(username='None','chatid: '||u.chat_id,'@'||username)
+||' ('||iif(u.first_name='None','',u.first_name)
+||' '||iif(u.last_name='None','',u.last_name)||') '
+||' всего: '||cnt||'. '
+||iif(r.name is null,'',r.name) 
+AS 'answ'
+FROM aa
+JOIN users u ON u.chat_id=aa.chat_id
+LEFT JOIN region r ON r.id=u.region_id
+ORDER BY cnt DESC
+    """
+        text = 'ТОП пользователи:'
+        list = await get_sql_first_column(sql)
+        for item in list:
+            text += '\n\n' + item
+        await message.answer(text)
 
 @dp.message_handler(commands=['last_votes'])
 async def send_last_votes(message: types.Message):
