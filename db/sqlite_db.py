@@ -27,6 +27,10 @@ async def get_df(sql):
     df = pd.read_sql(sql, create_engine(f'sqlite:///{DB_FILE_NAME}'))
     return df
 
+async def get_votes_count(project_code):
+    sql = "SELECT COUNT(*) AS cnt FROM votes where project_code='{0}'".format(project_code)
+    res = await get_sql_first_column(sql)
+    return res[0]
 
 async def get_total_text(sql):
     res = ''

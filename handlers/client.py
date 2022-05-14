@@ -228,40 +228,47 @@ async def send_project_info(message: types.Message):
             project, message.chat.id)
         a = await send_sql(sql)
         if not a:
-            sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type FROM deps d
-        LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}'
-        WHERE v.dep_id IS null AND d."dep" and person_type in('deputat','sf')
-        ORDER BY RANDOM()
-        LIMIT 1""".format(project)
+            sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type 
+                                FROM deps d
+                                LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
+                                WHERE  ("dep" LIKE  '%Буцкая%' or "dep" LIKE  '%Вторыгина%' or "dep" LIKE  '%Дробот%' or "dep" LIKE  '%Милонов%' or "dep" LIKE  '%Коробова%')  AND d."dep" not LIKE  '%Бастрыкин%' and v.dep_id IS NULL  LIMIT 1""".format(
+                project, message.chat.id)
             a = await send_sql(sql)
             if not a:
-                """ regional deps for user"""
                 sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type FROM deps d
-                JOIN users u ON u.chat_id='{1}' AND d.region_id=u.region_id
-                LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
-                WHERE v.dep_id IS NULL and person_type='deputat'
-                ORDER BY RANDOM() LIMIT 1""".format(project, message.chat.id)
+            LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}'
+            WHERE v.dep_id IS null AND d."dep" and person_type in('deputat','sf')
+            ORDER BY RANDOM()
+            LIMIT 1""".format(project)
                 a = await send_sql(sql)
                 if not a:
-                    """ if all deps already used for first round then we use individual dep for user"""
+                    """ regional deps for user"""
                     sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type FROM deps d
-                LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
-                WHERE v.dep_id IS null and person_type='sf'
-                ORDER BY RANDOM()
-                LIMIT 1""".format(project, message.chat.id)
+                    JOIN users u ON u.chat_id='{1}' AND d.region_id=u.region_id
+                    LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
+                    WHERE v.dep_id IS NULL and person_type='deputat'
+                    ORDER BY RANDOM() LIMIT 1""".format(project, message.chat.id)
                     a = await send_sql(sql)
                     if not a:
+                        """ if all deps already used for first round then we use individual dep for user"""
                         sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type FROM deps d
-                           LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
-                           WHERE v.dep_id IS null and person_type='deputat'
-                           ORDER BY RANDOM()
-                           LIMIT 1""".format(project, message.chat.id)
+                    LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
+                    WHERE v.dep_id IS null and person_type='sf'
+                    ORDER BY RANDOM()
+                    LIMIT 1""".format(project, message.chat.id)
                         a = await send_sql(sql)
                         if not a:
-                            flag_done = True
-                    project_obj = await send_sql(
-                        "select `desc` from projects where project_code in ('{0}') limit 1".format(project))
-                    # project_desc = project_obj[0]
+                            sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type FROM deps d
+                               LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
+                               WHERE v.dep_id IS null and person_type='deputat'
+                               ORDER BY RANDOM()
+                               LIMIT 1""".format(project, message.chat.id)
+                            a = await send_sql(sql)
+                            if not a:
+                                flag_done = True
+                        project_obj = await send_sql(
+                            "select `desc` from projects where project_code in ('{0}') limit 1".format(project))
+                        # project_desc = project_obj[0]
 
     if not flag_done:
         dep_id = str(a[0])
@@ -302,9 +309,10 @@ async def send_project_info(message: types.Message):
                     callback_data['amount'],
                     project_code,
                     dep_id))
-            await bot.edit_message_text(query.message.text, query.from_user.id, query.message.message_id,
+            await bot.edit_message_text(query.message.text, query.from_user.id, query.message.message_id,parse_mode = types.ParseMode.HTML,
                                         reply_markup=None)
-            await query.message.answer(f"""✅ Пометил у себя. Спасибо за Ваше участие! 🙂 Вместе мы сила! 💪💪💪 """)
+            votes_count = await get_votes_count(project_code)
+            await query.message.answer("""✅ Пометил у себя. Спасибо за Ваше участие! 🙂 Вместе мы сила! 💪💪💪\nМы уже написали обращений: {0}. """.format(votes_count))
             await send_projects_list(query.message)
 
         @dp.callback_query_handler(vote_cb.filter(action='up'))
@@ -315,6 +323,7 @@ async def send_project_info(message: types.Message):
             await bot.edit_message_text(f'You voted up! Now you have {amount} votes.',
                                         query.from_user.id,
                                         query.message.message_id,
+                                        parse_mode = types.ParseMode.HTML,
                                         reply_markup=get_keyboard(amount))
 
         @dp.callback_query_handler(vote_cb.filter(action='down'))
@@ -332,8 +341,7 @@ async def send_project_info(message: types.Message):
         text_appeal = """
 {3}
         
-Примерный текст обращения здесь: 👇👇👇 
-https://semfront.ru/prog/texter.php?to_person={2}&case={4}&user={0}&face={1}
+Примерный текст обращения : 👉 <b><a href='https://semfront.ru/prog/texter.php?to_person={2}&case={4}&user={0}&face={1}'>Здесь</a></b>
 """.format(
             message.from_user.id,
             dep_name.replace(' ', '%20'),
@@ -342,8 +350,8 @@ https://semfront.ru/prog/texter.php?to_person={2}&case={4}&user={0}&face={1}
             project
         )
         await message.answer(
-            f"{dep_name} ({person_type_str})\n{text_appeal} \nПишем сюда: 👉 {link_send}\n\nПосле отправки пожалуйста нажмите кнопку 'Отправлено 👍' \n\n💡 как вставить текст /help"
-            , reply_markup=get_keyboard(0))
+            f"{dep_name} ({person_type_str})\n{text_appeal} \nПишем: 👉 <b><a href='{link_send}'>Сюда</a></b>\n\n💡 как вставить текст /help\n\nПосле отправки пожалуйста нажмите кнопку 'Отправлено 👍' \n👇👇👇"
+            ,parse_mode=types.ParseMode.HTML, reply_markup=get_keyboard(0))
     else:
         await message.answer("""✅ Спасибо Вам за то, что вы отправили обращения! 💪💪💪 
 
@@ -360,18 +368,19 @@ async def write_command(message: types.Message):
             message.chat.id, message.chat.username, message.text))
     project_code = message.text.split('_')[1]
     dep_id = message.text.split('_')[0].replace('/', '')
+    votes_count = await get_votes_count('project_code')[0]
     await send_sql(
         "INSERT INTO votes (`chat_id`,`user_answer`,`project_code`,`dep_id`,`upd`) VALUES ('{0}','{1}','{2}','{3}',datetime('now'))".format(
             message.chat.id,
             message.text,
             project_code,
             dep_id))
-    await message.answer("""✅ Пометил у себя. Спасибо за Ваше участие! 🙂 Вместе мы сила! 💪💪💪
+    await message.answer("""✅ Пометил у себя. Спасибо за Ваше участие! Мы уже написали обращений: {1}. 🙂 Вместе мы сила! 💪💪💪
 
 Чтобы ещё написать другому парламентарию нажмите: 
 👉 /{0} .
 
-Список актуальных инициатив /start""".format(project_code))
+Список актуальных инициатив /start""".format(project_code,votes_count))
 
 
 def register_handlers_client(dp: Dispatcher):
