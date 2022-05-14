@@ -324,7 +324,7 @@ async def send_project_info(message: types.Message):
         text_appeal = """
 {3}
         
-Примерный текст обращения: 👉 <b><a href='https://semfront.ru/prog/texter.php?to_person={2}&case={4}&user={0}&face={1}'>Здесь</a></b>
+👉 <b><a href='https://semfront.ru/prog/texter.php?to_person={2}&case={4}&user={0}&face={1}'>Здесь примерный текст обращения</a></b>
 """.format(
             message.from_user.id,
             dep_name.replace(' ', '%20'),
@@ -333,7 +333,7 @@ async def send_project_info(message: types.Message):
             project
         )
         await message.answer(
-            f"{dep_name} ({person_type_str})\n{text_appeal} \nПишем: 👉 <b><a href='{link_send}'>Сюда</a></b>\n\n💡 как вставить текст /help\n\nПосле отправки пожалуйста нажмите кнопку 'Отправлено 👍' \n👇👇👇"
+            f"{dep_name} ({person_type_str})\n{text_appeal} \n 👉 <b><a href='{link_send}'>Пишем сюда</a></b>\n\n💡 как вставить текст /help\n\nПосле отправки пожалуйста нажмите кнопку 'Отправлено 👍' \n👇👇👇"
             ,parse_mode=types.ParseMode.HTML, reply_markup=get_keyboard(0))
     else:
         await message.answer("""✅ Спасибо Вам за то, что вы отправили обращения! 💪💪💪 
