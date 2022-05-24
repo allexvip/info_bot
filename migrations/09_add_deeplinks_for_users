@@ -1,3 +1,3 @@
 ALTER TABLE "users" ADD COLUMN "utm_source" VARCHAR(255) NULL DEFAULT NULL;
-ALTER TABLE "users"
-	ADD COLUMN "created" DATETIME NULL;
+ALTER TABLE "users"	ADD COLUMN "created" DATETIME NULL;
+UPDATE users SET created=upd;
