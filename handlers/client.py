@@ -123,8 +123,9 @@ async def send_welcome(message: types.Message):
     #     await message.answer('text if not in group')
 
     utm_source = ''
-    if message.get_args():
-        utm_source = message.get_args()
+    mess_args = message.get_args()
+    if mess_args:
+        utm_source = mess_args
 
     text_err = 'Error (/start)'
     try:
