@@ -121,18 +121,31 @@ async def send_welcome(message: types.Message):
     #     await message.answer('text if in group')
     # else:
     #     await message.answer('text if not in group')
+
+    utm_source = ''
+    if message.get_args():
+        utm_source = message.get_args()
+
     text_err = 'Error (/start)'
     try:
         await send_sql(
             "INSERT INTO logs (`chat_id`,`username`,`message`,`upd`) VALUES ('{0}','{1}','{2}',datetime('now'))".format(
                 message.chat.id, message.chat.username, message.text))
         await send_sql(
-            "INSERT INTO users (`chat_id`,`username`,`first_name`,`last_name`,`upd`) SELECT '{0}','{1}','{2}','{3}',datetime('now') where (select count(*) from `users` where chat_id='{0}')=0".format(
+            "INSERT INTO users (`chat_id`,`username`,`first_name`,`last_name`,`utm_source`,`created`) SELECT '{0}','{1}','{2}','{3}','{4}',datetime('now') where (select count(*) from `users` where chat_id='{0}')=0".format(
+                message.chat.id,
+                message.chat.username,
+                message.chat.first_name,
+                message.chat.last_name,
+                utm_source,
+            ))
+        await send_sql("update users set `username`='{1}',`first_name`='{2}',`last_name`='{3}',`upd`=datetime('now') where `chat_id`='{0}';".format(
                 message.chat.id,
                 message.chat.username,
                 message.chat.first_name,
                 message.chat.last_name,
             ))
+
         user_info = await bot.get_chat_member(chat_id=MAIN_CHANNEL_CHAT_ID, user_id=message.from_user.id)
         if not (user_info['status'] in ['left', 'banned', 'restricted']):
             await message.answer("""Добро пожаловать!
