@@ -312,7 +312,7 @@ async def send_project_info(message: types.Message):
             await bot.edit_message_text(query.message.text, query.from_user.id, query.message.message_id,parse_mode = types.ParseMode.HTML,
                                         reply_markup=None)
             votes_count = await get_votes_count(project_code)
-            await query.message.answer("""✅ Пометил у себя. Спасибо за Ваше участие! 🙂 \n\n💪💪💪 Мы сила! 💪💪💪\n\n‼️ Вместе мы уже написали {0} обращений(я) ‼️""".format(votes_count))
+            await query.message.answer("""✅ Пометил у себя. Спасибо за Ваше участие! 🙂 \n\n💪💪💪 Мы сила! 💪💪💪\n\n‼️По данной инициативе вместе мы уже написали {0} обращений(я) ‼️""".format(votes_count))
             await send_projects_list(query.message)
 
         @dp.callback_query_handler(vote_cb.filter(action='up'))
