@@ -128,7 +128,7 @@ async def send_total(message: types.Message):
     if message.from_user.id in admin_chatid_list:
         cur_time = await current_time()
         total_str = await sql_to_text(
-            "SELECT DATE(`created`) AS 'dt',`utm_source`,COUNT(*) AS 'cnt' from users WHERE utm_source='yandex1' GROUP BY DATE(`created`),`utm_source` ORDER BY `dt` desc")
+            "SELECT DATE(`created`) AS 'dt',`utm_source`,COUNT(*) AS 'cnt' from users GROUP BY DATE(`created`),`utm_source` ORDER BY `dt` desc")
         await message.answer(
             """Новые пользователи по состоянию на {0}\nдата метка кол-во\n{1} """.format(cur_time, total_str))
 
