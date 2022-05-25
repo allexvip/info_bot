@@ -129,7 +129,7 @@ async def send_total(message: types.Message):
         cur_time = await current_time()
         total_str = await sql_to_text(
             "SELECT DATE(`created`) AS 'data_time',COUNT(*) AS 'cnt',`utm_source` from users GROUP BY DATE(`created`),`utm_source` ORDER BY `data_time` desc")
-        await send_full_text(message.chat.id, """Количество новых пользователей по состоянию на {0}\n{1} """.format(cur_time, total_str))
+        await send_full_text(message.chat.id, """Статистика новых пользователей на {0}\n{1} """.format(cur_time, total_str))
 
 
 @dp.message_handler(commands=['total'])
