@@ -27,9 +27,9 @@ async def get_df(sql):
     df = pd.read_sql(sql, create_engine(f'sqlite:///{DB_FILE_NAME}'))
     return df
 
-async def sql_to_text(sql):
+async def sql_to_text(sql, header = True):
     df = await get_df(sql)
-    dfAsString = df.to_string(header=True, index=False)
+    dfAsString = df.to_string(header=header, index=False)
     return dfAsString
 
 async def get_votes_count(project_code):
