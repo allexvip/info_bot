@@ -29,7 +29,7 @@ async def get_df(sql):
 
 async def sql_to_text(sql):
     df = await get_df(sql)
-    dfAsString = df.to_string(header=False, index=False)
+    dfAsString = df.to_string(header=True, index=False)
     return dfAsString
 
 async def get_votes_count(project_code):
