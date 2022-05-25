@@ -22,7 +22,7 @@ async def send_projects_list(message: types.Message):
             message.chat.last_name,
         ))
 
-    await message.answer("""Предлагаю написать:
+    await message.answer("""🔻 Предлагаю написать ещё: 🔻 
 
  - 🔥 Заявление о внесении в ГД законопроекта о введении верхней границы алиментов жмите 
  👉 /alimentover
@@ -149,8 +149,11 @@ async def send_welcome(message: types.Message):
 
         user_info = await bot.get_chat_member(chat_id=MAIN_CHANNEL_CHAT_ID, user_id=message.from_user.id)
         if not (user_info['status'] in ['left', 'banned', 'restricted']):
+            votes_count = await sql_to_text("SELECT COUNT(*) as 'Кол-во обращений' FROM votes;", header=False)
             await message.answer("""Добро пожаловать!
-Я помогу подать обращение законодателям.
+🔻 Я помогу подать обращение законодателям. 🔻
+
+‼️ Мы вместе уже написали {0} ‼️обращений(я) законодателям! 💪💪💪
 
 Актуальные инициативы:
 - 🔥 Заявление о внесении в ГД законопроекта о введении верхней границы алиментов 
@@ -160,7 +163,7 @@ async def send_welcome(message: types.Message):
 👉 /copb
 
 💡 как вставить текст /help
-        """)
+        """.format(votes_count))
             res = await get_data("select region_id from users where chat_id = {} limit 1".format(message.from_user.id))
             if res[0][0] == None:
                 await set_city(message)
@@ -309,7 +312,7 @@ async def send_project_info(message: types.Message):
             await bot.edit_message_text(query.message.text, query.from_user.id, query.message.message_id,parse_mode = types.ParseMode.HTML,
                                         reply_markup=None)
             votes_count = await get_votes_count(project_code)
-            await query.message.answer("""✅ Пометил у себя. Спасибо за Ваше участие! 🙂 Вместе мы сила! 💪💪💪\nМы уже написали обращений: {0}. """.format(votes_count))
+            await query.message.answer("""✅ Пометил у себя. Спасибо за Ваше участие! 🙂 \n\n💪💪💪 Мы сила! 💪💪💪\n\n‼️ Вместе мы уже написали {0} обращений(я) ‼️""".format(votes_count))
             await send_projects_list(query.message)
 
         @dp.callback_query_handler(vote_cb.filter(action='up'))
