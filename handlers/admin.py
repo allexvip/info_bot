@@ -29,6 +29,8 @@ async def make_changes_command(message: types.Message):
 async def send_admin_info(message: types.Message):
     if message.from_user.id in admin_chatid_list:
         await message.answer("""Команды администратора:
+
+/new_users - new users
         
 /top_users - ТОП пользователей
 
@@ -54,6 +56,8 @@ async def send_admin_info(message: types.Message):
 
 {любой текст более 15 символов} - пересылка сообщения в чат поддержки
         """)
+
+
 
 
 @dp.message_handler(commands=['stat'])
@@ -118,6 +122,15 @@ async def send_df(message: types.Message):
         df = await get_df('SELECT * FROM users')
         print(df)
         await message.answer("df в принте")
+
+@dp.message_handler(commands=['new_users'])
+async def send_total(message: types.Message):
+    if message.from_user.id in admin_chatid_list:
+        cur_time = await current_time()
+        total_str = await sql_to_text(
+            "SELECT DATE(`created`) AS 'dt',`utm_source`,COUNT(*) AS 'cnt' from users WHERE utm_source='yandex1' GROUP BY DATE(`created`),`utm_source` ORDER BY `dt` desc")
+        await message.answer(
+            """Новые пользователи по состоянию на {0}\nдата метка кол-во\n{1} """.format(cur_time, total_str))
 
 
 @dp.message_handler(commands=['total'])

@@ -27,6 +27,11 @@ async def get_df(sql):
     df = pd.read_sql(sql, create_engine(f'sqlite:///{DB_FILE_NAME}'))
     return df
 
+async def sql_to_text(sql):
+    df = await get_df(sql)
+    dfAsString = df.to_string(header=False, index=False)
+    return dfAsString
+
 async def get_votes_count(project_code):
     sql = "SELECT COUNT(*) AS cnt FROM votes where project_code='{0}'".format(project_code)
     res = await get_sql_first_column(sql)
@@ -124,7 +129,7 @@ async def get_project_info(project, field):
 
 async def current_time():
     current_time_res = datetime.datetime.now()
-    return current_time_res.strftime("%d-%m-%Y %H:%M")
+    return current_time_res.strftime(" %d-%m-%Y %H:%M")
 
 
 async def from_db(sql):
