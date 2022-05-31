@@ -52,6 +52,8 @@ async def send_admin_info(message: types.Message):
 
 /send {chat_id}|{текст} - текст для отправки пользователю по chat_id
 
+/send_region {имя_региона}|{текст} - текст для отправки пользователю по региону
+
 /send_all {текст} - отправить сообщение всем пользователям бота
 
 {любой текст более 15 символов} - пересылка сообщения в чат поддержки
@@ -319,6 +321,28 @@ async def send_all(message: types.Message):
     else:
         await message.answer('Ничего не понял. Помощь /help')
 
+@dp.message_handler(commands=['send_region'])
+async def send_to_start_users(message: types.Message):
+    text_err = 'Error (send_region)'
+    if message.from_user.id in admin_chatid_list:
+        region_like = message.text.split('|')[0].split(' ')[1]
+        message_for_users = message.text.split('|')[1]
+        sql = f"""SELECT a.chat_id,a.username,b.name,b.chat_name,b.chat_url FROM users a
+JOIN region b ON b.id=a.region_id and lower(b.name) LIKE '%{region_like[1:]}%'"""
+        chat_id_list = await get_sql_first_column(sql)
+        for item_chat_id in chat_id_list:
+            print(item_chat_id + ' ' + message_for_users)
+            # await bot.send_message(80387796, '/send_region :\n'+item_chat_id+'\n' + message_for_users)
+            try:
+                await bot.send_message(item_chat_id, message_for_users)
+            except Exception as e:
+                text_err += '\n\n' + str(e)
+
+        await message.answer('Отправили пользователям ' + str(chat_id_list))
+        await send_full_text(80387796, 'Отправили пользователям ' + str(chat_id_list))
+        await send_full_text(80387796, text_err)
+    else:
+        await message.answer('Ничего не понял. Помощь /help')
 
 @dp.message_handler(commands=['send_to_start_users'])
 async def send_to_start_users(message: types.Message):
