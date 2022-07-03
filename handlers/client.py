@@ -56,7 +56,7 @@ async def set_city(message: types.Message):
         return urlkb
 
     await message.answer(
-        'Для совместных походов к народным избранникам в регионах нам нужно чтобы Вы выбрали Ваш регион:',
+        'Для общения и совместных походов к народным избранникам в регионах пожалуйста выберите Ваш регион:',
         reply_markup=get_keyboard(region_dict, 'region'))
 
     @dp.callback_query_handler(vote_region_cb.filter(action='region'))
@@ -71,9 +71,16 @@ async def set_city(message: types.Message):
         )
         logging.info(f'{query.from_user.id} region_id: {amount}')
         await send_sql(sql)
-        await bot.edit_message_text('Вы выбрали: {0}'.format(region_dict[amount]),
+
+        # get city_link
+        city_link = await get_sql_one_value("SELECT chat_url from region where id ='{0}';".format(amount))
+        region_chat_url = ''
+        if city_link != 'None':
+            region_chat_url = '\n\nПрисоединяйтесь в чат региона \n{0}'.format(city_link)
+        await bot.edit_message_text('Вы выбрали: {0}{1}'.format(region_dict[amount], region_chat_url),
                                     query.from_user.id,
                                     query.message.message_id,
+                                    parse_mode=types.ParseMode.HTML,
                                     reply_markup=None)
         await query.message.answer(
             'Спасибо! 👍 Пока выбираем регион, в будущем добавим города.\n\nЧтобы исправить Ваш регион - используйте /set_city')
@@ -102,7 +109,8 @@ async def set_city(message: types.Message):
 @dp.message_handler(commands=['my_appeals'])
 async def send_my_appeals(message: types.Message):
     sql = "select count(*) from votes where chat_id='{0}'".format(message.from_user.id)
-    text = 'Общее кол-во Ваших обращений о введении верхней границы алиментов: {0}\n'.format(await get_sql_one_value(sql))
+    text = 'Общее кол-во Ваших обращений о введении верхней границы алиментов: {0}\n'.format(
+        await get_sql_one_value(sql))
     sql = """SELECT '✅' ||' '||dep  FROM votes a 
 JOIN (select rowid,dep from deps order by dep) b ON b.rowid = a.dep_id
 WHERE a.project_code = 'alimentover' and chat_id='{0}'
@@ -140,7 +148,8 @@ async def send_welcome(message: types.Message):
                 message.chat.last_name,
                 utm_source,
             ))
-        await send_sql("update users set `username`='{1}',`first_name`='{2}',`last_name`='{3}',`upd`=datetime('now') where `chat_id`='{0}';".format(
+        await send_sql(
+            "update users set `username`='{1}',`first_name`='{2}',`last_name`='{3}',`upd`=datetime('now') where `chat_id`='{0}';".format(
                 message.chat.id,
                 message.chat.username,
                 message.chat.first_name,
@@ -269,7 +278,6 @@ async def send_project_info(message: types.Message):
                     if not a:
                         flag_done = True
 
-
     if not flag_done:
         dep_id = str(a[0])
         dep_name = str(a[1])
@@ -309,10 +317,13 @@ async def send_project_info(message: types.Message):
                     callback_data['amount'],
                     project_code,
                     dep_id))
-            await bot.edit_message_text(query.message.text, query.from_user.id, query.message.message_id,parse_mode = types.ParseMode.HTML,
+            await bot.edit_message_text(query.message.text, query.from_user.id, query.message.message_id,
+                                        parse_mode=types.ParseMode.HTML,
                                         reply_markup=None)
             votes_count = await get_votes_count(project_code)
-            await query.message.answer("""✅ Пометил у себя. Спасибо за Ваше участие! 🙂 \n\n💪💪💪 Мы сила! 💪💪💪\n\n‼️По данной инициативе вместе мы уже написали {0} обращений(я) ‼️""".format(votes_count))
+            await query.message.answer(
+                """✅ Пометил у себя. Спасибо за Ваше участие! 🙂 \n\n💪💪💪 Мы сила! 💪💪💪\n\n‼️По данной инициативе вместе мы уже написали {0} обращений(я) ‼️""".format(
+                    votes_count))
             await send_projects_list(query.message)
 
         @dp.callback_query_handler(vote_cb.filter(action='up'))
@@ -323,7 +334,7 @@ async def send_project_info(message: types.Message):
             await bot.edit_message_text(f'You voted up! Now you have {amount} votes.',
                                         query.from_user.id,
                                         query.message.message_id,
-                                        parse_mode = types.ParseMode.HTML,
+                                        parse_mode=types.ParseMode.HTML,
                                         reply_markup=get_keyboard(amount))
 
         @dp.callback_query_handler(vote_cb.filter(action='down'))
@@ -351,7 +362,7 @@ async def send_project_info(message: types.Message):
         )
         await message.answer(
             f"{dep_name} ({person_type_str})\n{text_appeal} \n 👉 <b><a href='{link_send}'>Пишем сюда</a></b>\n\n💡 как вставить текст /help\n\nПосле отправки пожалуйста нажмите кнопку 'Отправлено 👍' \n👇👇👇"
-            ,parse_mode=types.ParseMode.HTML, reply_markup=get_keyboard(0))
+            , parse_mode=types.ParseMode.HTML, reply_markup=get_keyboard(0))
     else:
         await message.answer("""✅ Спасибо Вам за то, что вы отправили обращения! 💪💪💪 
 
@@ -380,7 +391,7 @@ async def write_command(message: types.Message):
 Чтобы ещё написать другому парламентарию нажмите: 
 👉 /{0} .
 
-Список актуальных инициатив /start""".format(project_code,votes_count))
+Список актуальных инициатив /start""".format(project_code, votes_count))
 
 
 def register_handlers_client(dp: Dispatcher):

@@ -1,0 +1,9 @@
+update region set chat_url = 'https://t.me/+0ii14xI5oqpiNjQy' where name like '%Ямало-Ненецкий%';
+update region set chat_url = 'https://t.me/+0ii14xI5oqpiNjQy' where name like '%ХМАО%';
+update region set chat_url = 'https://t.me/+0ii14xI5oqpiNjQy' where name like '%Тюмен%';
+update region set chat_url = 'https://t.me/+w8p2l5aHBVZjY2My' where name like '%Иркутск%';
+update region set chat_url = 'https://t.me/+lIEuI-b6E2pjM2Fi' where name like '%Москва%';
+update region set chat_url = 'https://t.me/+YEkJqhmkYWtmYzJi' where name like '%Санкт-Петербург%';
+update region set chat_url = 'https://t.me/+Jns1AXhEv_pmZjky' where name like '%Новосибирск%';
+update region set chat_url = 'https://t.me/+BZcjKbLbMDgzYTNi' where name like '%Красноярск%';
+update region set chat_url = 'https://t.me/+lJ2A2Q4Gu88yOGNi' where name like '%Башкортостан%';
