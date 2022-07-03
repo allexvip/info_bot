@@ -113,7 +113,6 @@ JOIN users u ON u.region_id=r.id
 WHERE u.chat_id ='{0}';""".format(message.from_user.id)
     info = await get_data(sql)
     info_list = list(info)
-    print(info_list)
     if info_list:
         user_region_name = info_list[0][0]
         user_region_url = info_list[0][1]
