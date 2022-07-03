@@ -8,12 +8,14 @@ import datetime
 
 
 async def get_data(sql):
+    res = None
     try:
         cur.execute(sql)
         con.commit()
+        res = cur.fetchall()
     except Exception as e:
         logging.info('SQL exception get_data(): ' + str(e))
-    return cur.fetchall()
+    return res
 
 async def send_full_text(chat_id, info):
     if len(info) > 4096:

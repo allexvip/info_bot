@@ -106,6 +106,27 @@ async def set_city(message: types.Message):
         await send_projects_list(query.message)
 
 
+@dp.message_handler(commands=['chat_region'])
+async def region_chat(message: types.Message):
+    sql = """SELECT r.name,chat_url from region r
+JOIN users u ON u.region_id=r.id
+WHERE u.chat_id ='{0}';""".format(message.from_user.id)
+    info = await get_data(sql)
+    info_list = list(info)
+    print(info_list)
+    if info_list:
+        user_region_name = info_list[0][0]
+        user_region_url = info_list[0][1]
+        if user_region_url != None:
+            user_region_link_description = "\n\nСсылка на чат региона:\n{0}".format(user_region_url)
+        else:
+            user_region_link_description = "\n\nПока соратников из Вашего региона мало. Приглашайте пожалуйста соратников сюда и при количестве более 30 человек мы организуем чат для Вашего региона."
+        await message.answer("Ваш регион: {0}{1}".format(user_region_name, user_region_link_description))
+        await send_projects_list(message)
+    else:
+        await message.answer("""Выберите пожалуйста Ваш регион 👉 /set_city""")
+
+
 @dp.message_handler(commands=['my_appeals'])
 async def send_my_appeals(message: types.Message):
     sql = "select count(*) from votes where chat_id='{0}'".format(message.from_user.id)
