@@ -224,7 +224,9 @@ async def send_appeals_rate_sf(message: types.Message):
     if message.from_user.id in admin_chatid_list:
         text = ''
 
-        sql = "SELECT COUNT(DISTINCT a.chat_id) AS 'cnt'  FROM votes a WHERE a.dep_id>448 and a.project_code='alimentover'"
+        sql = """SELECT COUNT(DISTINCT a.chat_id) AS 'cnt'  FROM votes a 
+JOIN deps b ON b.rowid = a.dep_id  AND b.person_type='sf'
+WHERE a.project_code='alimentover'"""
         text += """Пользователей написавших в Совет Федерации: """
         list = await get_sql_first_column(sql)
         text += list[0]
@@ -255,7 +257,9 @@ async def send_appeals_rate_dep(message: types.Message):
     if message.from_user.id in admin_chatid_list:
         text = ''
 
-        sql = "SELECT COUNT(DISTINCT a.chat_id) AS 'cnt'  FROM votes a WHERE a.dep_id<448 and a.project_code='alimentover'"
+        sql = """SELECT COUNT(DISTINCT a.chat_id) AS 'cnt'  FROM votes a 
+JOIN deps b ON b.rowid = a.dep_id  AND b.person_type='deputat'
+WHERE a.project_code='alimentover'"""
         text += """Пользователей написавших в Госдуму: """
         list = await get_sql_first_column(sql)
         text += list[0]

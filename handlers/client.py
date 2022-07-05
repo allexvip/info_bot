@@ -275,43 +275,58 @@ async def send_project_info(message: types.Message):
         a = await send_sql(sql)
         if not a:
             sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type 
-                                FROM deps d
-                                LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
-                                WHERE  ("dep" LIKE  '%Глазкова%' or "dep" LIKE  '%Ларионова%' or "dep" LIKE  '%Буцкая%' or "dep" LIKE  '%Вторыгина%' or "dep" LIKE  '%Дробот%' or "dep" LIKE  '%Милонов%' or "dep" LIKE  '%Коробова%')  AND d."dep" not LIKE  '%Бастрыкин%' and v.dep_id IS NULL  LIMIT 1""".format(
+                        FROM deps d
+                        LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
+                        WHERE d.person_type IN ('minjust','mintrud') and v.dep_id IS NULL ORDER BY RANDOM() LIMIT 1""".format(
                 project, message.chat.id)
             a = await send_sql(sql)
             if not a:
-                """ regional deps for user"""
-                sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type FROM deps d
-                                   JOIN users u ON u.chat_id='{1}' AND d.region_id=u.region_id
-                                   LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id=u.chat_id
-                                   WHERE v.dep_id IS NULL and person_type='deputat'
-                                   ORDER BY RANDOM() LIMIT 1""".format(project, message.chat.id)
+                sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type 
+                                    FROM deps d
+                                    LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
+                                    WHERE  ("dep" LIKE  '%Глазкова%' or "dep" LIKE  '%Ларионова%' or "dep" LIKE  '%Буцкая%' or "dep" LIKE  '%Вторыгина%' or "dep" LIKE  '%Дробот%' or "dep" LIKE  '%Милонов%' or "dep" LIKE  '%Коробова%')  AND d."dep" not LIKE  '%Бастрыкин%' and v.dep_id IS NULL  LIMIT 1""".format(
+                    project, message.chat.id)
                 a = await send_sql(sql)
                 if not a:
+                    """ regional deps for user"""
                     sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type FROM deps d
-                                LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id={1}
-                                WHERE v.dep_id IS null and person_type in('deputat','sf') 
-                                ORDER BY RANDOM()
-                                LIMIT 1""".format(project, message.chat.id)
+                                       JOIN users u ON u.chat_id='{1}' AND d.region_id=u.region_id
+                                       LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id=u.chat_id
+                                       WHERE v.dep_id IS NULL and person_type='deputat'
+                                       ORDER BY RANDOM() LIMIT 1""".format(project, message.chat.id)
                     a = await send_sql(sql)
                     if not a:
-                        flag_done = True
+                        sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type FROM deps d
+                                    LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id={1}
+                                    WHERE v.dep_id IS null and person_type in('deputat','sf') 
+                                    ORDER BY RANDOM()
+                                    LIMIT 1""".format(project, message.chat.id)
+                        a = await send_sql(sql)
+                        if not a:
+                            flag_done = True
 
     if not flag_done:
         dep_id = str(a[0])
         dep_name = str(a[1])
         link_send = str(a[2])
         person_type = str(a[3])
-        if 'sk' in person_type:
-            person_type_str = "Следственный комитет"
-            url_repson = "sk"
-        elif 'sf' in person_type:
-            person_type_str = "Совет Федерации"
-            url_repson = "sf"
+
+        person_types = {
+            'sk': "Следственный комитет",
+            'sf': "Совет Федерации",
+            'deputat': "ГосДума",
+            'minjust': "",
+            'mintrud': "",
+
+        }
+
+        if person_type in person_types.keys():
+            person_type_str = person_types[person_type]
+            url_repson = person_type
         else:
             person_type_str = "ГосДума"
             url_repson = "dep"
+
         # ----keyboard
         vote_cb = CallbackData('vote', 'action', 'amount')  # post:<action>:<amount>
 
@@ -369,19 +384,13 @@ async def send_project_info(message: types.Message):
         # ----keyboard end
         project_desc = await get_sql_one_value(
             "SELECT desc from projects where project_code in ('{0}');".format(project))
-        text_appeal = """
-{3}
+        text_appeal = f"""
+{project_desc}
         
-👉 <b><a href='https://semfront.ru/prog/texter.php?to_person={2}&case={4}&user={0}&face={1}'>Здесь примерный текст обращения</a></b>
-""".format(
-            message.from_user.id,
-            dep_name.replace(' ', '%20'),
-            url_repson,
-            project_desc,
-            project
-        )
+👉 <b><a href='https://semfront.ru/prog/texter.php?to_person={url_repson}&case={project}&user={message.from_user.id}&face={(dep_name.replace(' ', '%20'))}'>Здесь примерный текст обращения</a></b>
+"""
         await message.answer(
-            f"{dep_name} ({person_type_str})\n{text_appeal} \n 👉 <b><a href='{link_send}'>Пишем сюда</a></b>\n\n💡 как вставить текст /help\n\nПосле отправки пожалуйста нажмите кнопку 'Отправлено 👍' \n👇👇👇"
+            f"{dep_name} \n{person_type_str}\n{text_appeal} \n 👉 <b><a href='{link_send}'>Пишем сюда</a></b>\n\n💡 как вставить текст /help\n\nПосле отправки пожалуйста нажмите кнопку 'Отправлено 👍' \n👇👇👇"
             , parse_mode=types.ParseMode.HTML, reply_markup=get_keyboard(0))
     else:
         await message.answer("""✅ Спасибо Вам за то, что вы отправили обращения! 💪💪💪 
