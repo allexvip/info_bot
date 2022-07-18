@@ -45,7 +45,7 @@ async def echo(message: types.Message):
             await message.answer('Ничего не понял. Помощь /help')
         else:
             await bot.send_message(BOT_USER_ANSWERS_CHAT_ID, answ_text)
-            await message.send_copy(chat_id=BOT_USER_ANSWERS_CHAT_ID, disable_notification=True,
+            await message.forward(chat_id=BOT_USER_ANSWERS_CHAT_ID, disable_notification=True,
                                     reply_to_message_id=True)
             #await message.answer('Переслал Ваше сообщение модератору.\nСпасибо! \n\nПомощь /help')
     except Exception as e:

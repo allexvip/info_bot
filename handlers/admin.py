@@ -282,6 +282,8 @@ WHERE a.project_code='alimentover'"""
         await send_full_text(message.from_user.id, text)  # message.answer(text)
 
 
+
+
 @dp.message_handler(lambda message: '/send ' in message.text)
 async def send_to_user(message: types.Message):
     if message.from_user.id in admin_chatid_list:
