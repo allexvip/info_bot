@@ -284,26 +284,47 @@ async def send_project_info(message: types.Message):
             sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type 
                                 FROM deps d
                                 LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
-                                WHERE  ("dep" LIKE  '%Глазкова%' or "dep" LIKE  '%Ларионова%' or "dep" LIKE  '%Буцкая%' or "dep" LIKE  '%Вторыгина%' or "dep" LIKE  '%Дробот%' or "dep" LIKE  '%Милонов%' or "dep" LIKE  '%Коробова%')  AND d."dep" not LIKE  '%Бастрыкин%' and v.dep_id IS NULL  LIMIT 1""".format(
+                                WHERE  ("dep" LIKE  '%Глазкова%' or "dep" LIKE  '%Ларионова%' or "dep" LIKE  '%Буцкая%' or "dep" LIKE  '%Вторыгина%' or "dep" LIKE  '%Дробот%' or "dep" LIKE  '%Милонов%' or "dep" LIKE  '%Коробова%')  AND d."dep" not LIKE  '%Бастрыкин%' and v.dep_id IS NULL ORDER BY RANDOM() LIMIT 1""".format(
                 project, message.chat.id)
             a = await send_sql(sql)
             if not a:
-                """ regional deps for user"""
-                sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type FROM deps d
-                                   JOIN users u ON u.chat_id='{1}' AND d.region_id=u.region_id
-                                   LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id=u.chat_id
-                                   WHERE v.dep_id IS NULL and person_type='deputat'
-                                   ORDER BY RANDOM() LIMIT 1""".format(project, message.chat.id)
+                sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type 
+                                                FROM deps d
+                                                LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
+                                                WHERE  ("dep" LIKE  '%Крашениннико%'
+or "dep" LIKE  '%Бессарабо%'
+or "dep" LIKE  '%Напс%'
+or "dep" LIKE  '%Панькин%'
+or "dep" LIKE  '%Синельщико%'
+or "dep" LIKE  '%Белы%'
+or "dep" LIKE  '%Лисицы%'
+or "dep" LIKE  '%Аршб%'
+or "dep" LIKE  '%Брыки%'
+or "dep" LIKE  '%Вятки%'
+or "dep" LIKE  '%Глазков%'
+or "dep" LIKE  '%Мархае%'
+or "dep" LIKE  '%Петров Ю%'
+or "dep" LIKE  '%Тетердинк%'
+or "dep" LIKE  '%Чепико%')  AND d."dep" not LIKE  '%Бастрыкин%' and v.dep_id IS NULL ORDER BY RANDOM() LIMIT 1""".format(
+                    project, message.chat.id)
                 a = await send_sql(sql)
                 if not a:
+                    """ regional deps for user"""
                     sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type FROM deps d
-                                LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id={1}
-                                WHERE v.dep_id IS null and person_type in('deputat','sf') 
-                                ORDER BY RANDOM()
-                                LIMIT 1""".format(project, message.chat.id)
+                                       JOIN users u ON u.chat_id='{1}' AND d.region_id=u.region_id
+                                       LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id=u.chat_id
+                                       WHERE v.dep_id IS NULL and person_type='deputat'
+                                       ORDER BY RANDOM() LIMIT 1""".format(project, message.chat.id)
                     a = await send_sql(sql)
                     if not a:
-                        flag_done = True
+                        sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type FROM deps d
+                                    LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id={1}
+                                    WHERE v.dep_id IS null and person_type in('deputat','sf') 
+                                    ORDER BY RANDOM()
+                                    LIMIT 1""".format(project, message.chat.id)
+                        a = await send_sql(sql)
+                        if not a:
+                            flag_done = True
 
     if not flag_done:
         dep_id = str(a[0])
