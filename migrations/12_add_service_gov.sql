@@ -12,5 +12,5 @@ SET
 
 Обязательно приложите файлы к обращению.'
 WHERE  project_code ='alimentovergov';
-INSERT INTO `deps`` (`dep_full_name`, `dep`, `link`, `person_type`, `link_send`) VALUES ('Правительство России', 'Правительство России', 'http://services.government.ru/letters/form/', 'servicegov', 'http://services.government.ru/letters/form/');
+INSERT INTO `deps` (`dep_full_name`, `dep`, `link`, `person_type`, `link_send`) VALUES ('Правительство России', 'Правительство России', 'http://services.government.ru/letters/form/', 'servicegov', 'http://services.government.ru/letters/form/');
 
