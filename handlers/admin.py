@@ -85,6 +85,10 @@ WHERE a.project_code='{0}' """.format(arg_list[1]))
                 """SELECT COUNT(*) AS 'cnt'  FROM votes a
 JOIN deps d ON d.rowid=a.dep_id AND d.person_type='sk'
 WHERE a.project_code='{0}' """.format(arg_list[1]))
+            appeals_count_servicegov = await get_sql_one_value(
+                """SELECT COUNT(*) AS 'cnt'  FROM votes a
+JOIN deps d ON d.rowid=a.dep_id AND d.person_type='servicegov'
+WHERE a.project_code='{0}' """.format(arg_list[1]))
 
             text = ''
             if int(appeals_count_deps) > 0:
@@ -97,6 +101,9 @@ WHERE a.project_code='{0}' """.format(arg_list[1]))
             if int(appeals_count_sk) > 0:
                 text += f"""
 ✅ Количество обращений Бастрыкину: {appeals_count_sk}"""
+            if int(appeals_count_sk) > 0:
+                text += f"""
+        ✅ Количество обращений в Правительство России: {appeals_count_servicegov}"""
 
     await message.answer("""https://t.me/{4}
             
