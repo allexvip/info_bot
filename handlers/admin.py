@@ -104,7 +104,7 @@ WHERE a.project_code='{0}' """.format(arg_list[1]))
 ✅ Количество обращений Бастрыкину: {appeals_count_sk}"""
             if int(appeals_count_servicegov) > 0:
                 text += f"""
-        ✅ Количество обращений в Правительство России: {appeals_count_servicegov}"""
+✅ Количество обращений в Правительство России: {appeals_count_servicegov}"""
 
     await message.answer("""https://t.me/{4}
             
