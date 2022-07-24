@@ -64,6 +64,7 @@ async def send_admin_info(message: types.Message):
 
 @dp.message_handler(commands=['stat'])
 async def send_df(message: types.Message):
+    project_info = None
     if message.from_user.id in admin_chatid_list:
         if ' ' in message.text:
             cur_time = await current_time()
