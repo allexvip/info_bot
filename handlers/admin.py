@@ -102,7 +102,7 @@ WHERE a.project_code='{0}' """.format(arg_list[1]))
             if int(appeals_count_sk) > 0:
                 text += f"""
 ✅ Количество обращений Бастрыкину: {appeals_count_sk}"""
-            if int(appeals_count_sk) > 0:
+            if int(appeals_count_servicegov) > 0:
                 text += f"""
         ✅ Количество обращений в Правительство России: {appeals_count_servicegov}"""
 
