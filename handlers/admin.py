@@ -194,7 +194,7 @@ ORDER BY cnt DESC
         list = await get_sql_first_column(sql)
         for item in list:
             text += '\n\n' + item
-        await message.answer(text)
+        await send_full_text(message.chat.id, text)
 
 @dp.message_handler(commands=['last_votes'])
 async def send_last_votes(message: types.Message):
@@ -203,13 +203,13 @@ async def send_last_votes(message: types.Message):
     JOIN users u ON u.chat_id=v.chat_id
     JOIN deps d ON d.rowid=v.dep_id
     WHERE v.project_code='alimentover'
-    ORDER BY v.upd DESC LIMIT 10
+    ORDER BY v.upd DESC LIMIT 1000
     """
         text = 'Последние голоса:'
         list = await get_sql_first_column(sql)
         for item in list:
             text += '\n\n' + item
-        await message.answer(text)
+        await send_full_text(message.chat.id, text)
 
 
 @dp.message_handler(commands=['no_active_users'])
