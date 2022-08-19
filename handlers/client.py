@@ -428,7 +428,7 @@ or "dep" LIKE  '%Чепико%')  AND d."dep" not LIKE  '%Бастрыкин%' a
 👉 <b><a href='https://semfront.ru/prog/texter.php?to_person={url_repson}&case={project}&user={message.from_user.id}&face={(dep_name.replace(' ', '%20'))}'>Здесь примерный текст обращения</a></b>
 """
         await message.answer(
-            f"{dep_name} ({person_type_str})\n{text_appeal} \n 👉 <b><a href='{link_send}'>Пишем сюда</a></b>\n\n💡 как вставить текст /help\n\nПосле отправки пожалуйста нажмите кнопку 'Отправлено 👍' \n👇👇👇"
+            f"{dep_name} ({person_type_str})\n{text_appeal} \n 👉 <b><a href='{link_send}'>Пишем сюда</a></b>\n\n💡 Помощь /help\n\nПосле отправки пожалуйста нажмите кнопку 'Отправлено 👍' \n👇👇👇"
             , parse_mode=types.ParseMode.HTML, reply_markup=get_keyboard(0))
     else:
         await message.answer("""✅ Спасибо Вам за то, что вы отправили обращения! 💪💪💪 
