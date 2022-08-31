@@ -175,7 +175,7 @@ async def send_users_count(message: types.Message):
         await message.answer(text)
 
 @dp.message_handler(commands=['top_users'])
-async def send_last_votes(message: types.Message):
+async def top_users(message: types.Message):
     if message.from_user.id in admin_chatid_list:
         sql = """with aa AS (SELECT v.chat_id,COUNT(*) AS cnt FROM votes v WHERE v.project_code='alimentover' GROUP BY v.chat_id HAVING cnt>20)
 SELECT 
@@ -199,17 +199,21 @@ ORDER BY cnt DESC
 @dp.message_handler(commands=['last_votes'])
 async def send_last_votes(message: types.Message):
     if message.from_user.id in admin_chatid_list:
-        sql = """SELECT v.upd||' @'||u.username||' ('||u.chat_id||' '||u.first_name||' '||u.last_name||') -> '||d.dep AS 'answ' FROM votes v
-    JOIN users u ON u.chat_id=v.chat_id
-    JOIN deps d ON d.rowid=v.dep_id
-    WHERE v.project_code='alimentover'
-    ORDER BY v.upd DESC LIMIT 1000
-    """
-        text = 'Последние голоса:'
-        list = await get_sql_first_column(sql)
-        for item in list:
-            text += '\n\n' + item
-        await send_full_text(message.chat.id, text)
+        cnt = 30
+        try:
+            cnt = message.text.split(' ')[1]
+        finally:
+            sql = f"""SELECT v.upd||' @'||u.username||' ('||u.chat_id||' '||u.first_name||' '||u.last_name||') -> '||d.dep AS 'answ' FROM votes v
+        JOIN users u ON u.chat_id=v.chat_id
+        JOIN deps d ON d.rowid=v.dep_id
+        WHERE v.project_code='alimentover'
+        ORDER BY v.upd DESC LIMIT {cnt}
+        """
+            text = 'Последние голоса:'
+            list = await get_sql_first_column(sql)
+            for item in list:
+                text += '\n\n' + item
+            await send_full_text(message.chat.id, text)
 
 
 @dp.message_handler(commands=['no_active_users'])
