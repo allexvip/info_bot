@@ -44,7 +44,7 @@ async def send_admin_info(message: types.Message):
 
 /users_count - общее количество пользователей бота
 
-/last_votes - последние голоса
+/last_votes {30} - последние 30 голосов
 
 /no_active_users - неактивные пользователи
 
