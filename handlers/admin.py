@@ -314,13 +314,9 @@ async def send_all(message: types.Message):
     text_err = 'Error (send all)'
     if message.from_user.id in admin_chatid_list:
         message_for_users = message.text.replace('/send_all ', '')
-        # await message.answer(str(message.chat.id)+'\n\n'+message.text)
         chat_id_list = await get_all_users(con, cur)
-        # print(chat_id_list)
-        # await bot.send_message(80387796,'/send_all :\n\n' + message_for_users)
         for item_chat_id in chat_id_list:
             print(item_chat_id + ' ' + message_for_users)
-            # await bot.send_message(80387796, '/send_all :\n'+item_chat_id+'\n' + message_for_users)
             try:
                 await bot.send_message(item_chat_id, message_for_users)
             except Exception as e:
