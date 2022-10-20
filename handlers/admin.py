@@ -125,13 +125,13 @@ https://t.me/{4}""".format(project_info,
                            text
                            ))
 
-#
-# @dp.message_handler(commands=['df'])
-# async def send_df(message: types.Message):
-#     if message.from_user.id in admin_chatid_list:
-#         df = await get_df('SELECT * FROM users')
-#         print(df)
-#         await message.answer("df в принте")
+
+@dp.message_handler(commands=['df'])
+async def send_df(message: types.Message):
+    if message.from_user.id in admin_chatid_list:
+        df = await get_df('SELECT * FROM users')
+        print(df)
+        await message.answer("df в принте")
 
 @dp.message_handler(commands=['new_users'])
 async def send_total(message: types.Message):
