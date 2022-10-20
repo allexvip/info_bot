@@ -45,6 +45,12 @@ async def send_projects_list(message: types.Message):
 
 """
 
+
+@dp.message_handler(commands=['id'])
+async def set_city(message: types.Message):
+    await message.answer(f'Ваш chatid: {message.from_user.id}')
+
+
 @dp.message_handler(commands=['set_city'])
 async def set_city(message: types.Message):
     await send_sql(

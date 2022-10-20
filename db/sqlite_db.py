@@ -2,7 +2,7 @@ import logging
 import sqlite3 as sq
 from create_bot import *
 from models import repository
-import pandas as pd
+# import pandas as pd
 from sqlalchemy import create_engine
 import datetime
 
@@ -25,9 +25,9 @@ async def send_full_text(chat_id, info):
         await bot.send_message(chat_id, info)
 
 
-async def get_df(sql):
-    df = pd.read_sql(sql, create_engine(f'sqlite:///{DB_FILE_NAME}'))
-    return df
+# async def get_df(sql):
+#     df = pd.read_sql(sql, create_engine(f'sqlite:///{DB_FILE_NAME}'))
+#     return df
 
 async def sql_to_text(sql, header = True):
     df = await get_df(sql)
