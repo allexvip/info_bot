@@ -194,7 +194,8 @@ async def send_welcome(message: types.Message):
 
         user_info = await bot.get_chat_member(chat_id=MAIN_CHANNEL_CHAT_ID, user_id=message.from_user.id)
         if not (user_info['status'] in ['left', 'banned', 'restricted']):
-            votes_count = await sql_to_text("SELECT COUNT(*) as 'Кол-во обращений' FROM votes;", header=False)
+            # votes_count = await sql_to_text("SELECT COUNT(*) as 'Кол-во обращений' FROM votes;", header=False)
+            votes_count = await get_sql_one_value("SELECT COUNT(*) as 'Кол-во обращений' FROM votes;")
             await message.answer("""Добро пожаловать!
 🔻 Я помогу подать обращение законодателям. 🔻
 

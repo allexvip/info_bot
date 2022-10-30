@@ -2,7 +2,7 @@ import logging
 import sqlite3 as sq
 from create_bot import *
 from models import repository
-import pandas as pd
+# import pandas as pd
 from sqlalchemy import create_engine
 import datetime
 
@@ -17,6 +17,7 @@ async def get_data(sql):
         logging.info('SQL exception get_data(): ' + str(e))
     return res
 
+
 async def send_full_text(chat_id, info):
     if len(info) > 4096:
         for x in range(0, len(info), 4096):
@@ -26,18 +27,22 @@ async def send_full_text(chat_id, info):
 
 
 async def get_df(sql):
-    df = pd.read_sql(sql, create_engine(f'sqlite:///{DB_FILE_NAME}'))
+    df = {}
+    # df = pd.read_sql(sql, create_engine(f'sqlite:///{DB_FILE_NAME}'))
     return df
 
-async def sql_to_text(sql, header = True):
-    df = await get_df(sql)
-    dfAsString = df.to_string(header=header, index=False)
-    return dfAsString
+
+# async def sql_to_text(sql, header=True):
+#     df = await get_df(sql)
+#     dfAsString = df.to_string(header=header, index=False)
+#     return dfAsString
+
 
 async def get_votes_count(project_code):
     sql = "SELECT COUNT(*) AS cnt FROM votes where project_code='{0}'".format(project_code)
     res = await get_sql_first_column(sql)
     return res[0]
+
 
 async def get_total_text(sql):
     res = ''
@@ -71,18 +76,35 @@ async def get_all_users(con, cur):
 async def get_sql_first_column(sql):
     list = []
     a = await from_db(sql)
-    #print(a)
+    # print(a)
     for item_a in a:
         list.append(str(item_a[0]))
     return list
 
+
 async def get_sql_one_value(sql):
     list = []
     a = await from_db(sql)
-    #print(a)
+    # print(a)
     for item_a in a:
         list.append(str(item_a[0]))
     return list[0]
+
+
+async def sql_to_str(sql):
+    list = []
+    line_dict = {}
+    res = ''
+    a = await from_db(sql)
+    for item_a in a:
+        for item_index in range(len(item_a)):
+            # line_dict[item_index] = str(item_a[item_index])
+            #list.append(item_a[line_dict])
+            res += f'{str(item_a[item_index])}  '
+        res +='\n'
+        line_dict = {}
+    return res
+
 
 async def get_users_count(con, cur):
     list = []
@@ -92,6 +114,7 @@ async def get_users_count(con, cur):
         list.append(str(item_a[0]))
     return list[0]
 
+
 async def get_region_users_count(con, cur):
     list = []
     sql = "SELECT COUNT(*) 'all users' FROM users where region_id is not null"
@@ -100,7 +123,8 @@ async def get_region_users_count(con, cur):
         list.append(str(item_a[0]))
     return list[0]
 
-async def get_users_votes(project,chat_id):
+
+async def get_users_votes(project, chat_id):
     list = []
     sql = """SELECT chat_id,project_code,group_concat(dep||' /'||b.rowid||'_'||project_code||'_minus '||' /'||b.rowid||'_'||project_code||'_plus', '\n') AS 'deps_string' FROM votes a 
 JOIN deps b ON b.rowid = a.dep_id
@@ -109,11 +133,11 @@ GROUP BY chat_id,project_code,chat_id """
     sql = """SELECT chat_id,project_code,group_concat(dep,'\n') AS 'deps_string' FROM votes a 
     JOIN (select rowid,dep from deps order by dep) b ON b.rowid = a.dep_id
     WHERE a.project_code = '{0}' and chat_id='{1}'
-    GROUP BY chat_id,project_code,chat_id """.format(project,chat_id)
+    GROUP BY chat_id,project_code,chat_id """.format(project, chat_id)
     a = await from_db(sql)
     for item_a in a:
         inList = []
-        #print(item_a)
+        # print(item_a)
         for item in item_a:
             inList.append(item)
         list.append(inList)
@@ -146,6 +170,7 @@ async def from_db(sql):
 
     if sql.lower()[0:6] == 'select' or sql.lower()[0:4] == 'with':
         return res.fetchall()
+
 
 async def send_sql(sql):
     res = ''
