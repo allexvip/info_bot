@@ -1,8 +1,14 @@
 [Unit]
-Description=Info bot
-After=multi-user.target
+Description=Info bot service
+After=network.target
+StartLimitIntervalSec=0
+
 [Service]
-Type=idle
+Type=simple
+Restart=always
+RestartSec=1
+User=alexey
 ExecStart=./info_bot/start.sh
+
 [Install]
 WantedBy=multi-user.target
