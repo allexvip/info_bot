@@ -8,7 +8,7 @@ Type=simple
 Restart=always
 RestartSec=1
 User=alexey
-ExecStart=./info_bot/start.sh
+ExecStart=/home/alexey/info_bot/start.sh
 
 [Install]
 WantedBy=multi-user.target
