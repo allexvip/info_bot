@@ -71,25 +71,25 @@ async def send_df(message: types.Message):
             cur_time = cur_time.replace('-', '.')
             arg_list = message.text.split(' ')
             project_info = await get_sql_one_value(
-                "SELECT name from projects where project_code in ('{0}');".format(arg_list[1]))
+                f"SELECT name from projects where project_code in ('{arg_list[1]}');")
             users_count_all = await get_users_count(con, cur)
             users_count_regions = await get_region_users_count(con, cur)
             appeals_count_deps = await get_sql_one_value(
-                """SELECT COUNT(*) AS 'cnt'  FROM votes a
+                f"""SELECT COUNT(*) AS 'cnt'  FROM votes a
         JOIN deps d ON d.rowid=a.dep_id AND d.person_type='deputat'
-        WHERE a.project_code='{0}' """.format(arg_list[1]))
+        WHERE a.project_code='{arg_list[1]}' """)
             appeals_count_sf = await get_sql_one_value(
-                """SELECT COUNT(*) AS 'cnt'  FROM votes a
+                f"""SELECT COUNT(*) AS 'cnt'  FROM votes a
 JOIN deps d ON d.rowid=a.dep_id AND d.person_type='sf'
-WHERE a.project_code='{0}' """.format(arg_list[1]))
+WHERE a.project_code='{arg_list[1]}' """)
             appeals_count_sk = await get_sql_one_value(
-                """SELECT COUNT(*) AS 'cnt'  FROM votes a
+                f"""SELECT COUNT(*) AS 'cnt'  FROM votes a
 JOIN deps d ON d.rowid=a.dep_id AND d.person_type='sk'
-WHERE a.project_code='{0}' """.format(arg_list[1]))
+WHERE a.project_code='{arg_list[1]}' """)
             appeals_count_servicegov = await get_sql_one_value(
-                """SELECT COUNT(*) AS 'cnt'  FROM votes a
+                f"""SELECT COUNT(*) AS 'cnt'  FROM votes a
 JOIN deps d ON d.rowid=a.dep_id AND d.person_type='servicegov'
-WHERE a.project_code='{0}' """.format(arg_list[1]))
+WHERE a.project_code='{arg_list[1]}' """)
 
             text = ''
             if int(appeals_count_deps) > 0:
@@ -106,24 +106,18 @@ WHERE a.project_code='{0}' """.format(arg_list[1]))
                 text += f"""
 ✅ Количество обращений в Правительство России: {appeals_count_servicegov}"""
 
-    await message.answer("""https://t.me/{4}
+    await message.answer(f"""https://t.me/{BOT_NAME}
             
-ℹ️ Статистика на {3} (МСК) по инициативе:
+ℹ️ Статистика на {cur_time} (МСК) по инициативе:
             
-{0}
+{project_info}
             
-✅ Общее количество пользователей бота: {1}
+✅ Общее количество пользователей бота: {users_count_all}
 
-✅ Количество пользователей, указавших свой регион: {2}
-{5}
+✅ Количество пользователей, указавших свой регион: {users_count_regions}
+{text}
 
-https://t.me/{4}""".format(project_info,
-                           users_count_all,
-                           users_count_regions,
-                           cur_time,
-                           BOT_NAME,
-                           text
-                           ))
+https://t.me/{4}""")
 
 
 @dp.message_handler(commands=['df'])
@@ -139,7 +133,7 @@ async def send_total(message: types.Message):
         cur_time = await current_time()
         total_str = await sql_to_str(
             "SELECT DATE(`created`) AS 'data_time',COUNT(*) AS 'cnt',`utm_source` from users GROUP BY DATE(`created`),`utm_source` ORDER BY `data_time` desc")
-        await send_full_text(message.chat.id, """Статистика новых пользователей на {0}\n{1} """.format(cur_time, str(total_str)))
+        await send_full_text(message.chat.id, f"""Статистика новых пользователей на {cur_time}\n{str(total_str)} """)
 
 
 @dp.message_handler(commands=['total'])
@@ -147,9 +141,9 @@ async def send_total(message: types.Message):
     if message.from_user.id in admin_chatid_list:
         cur_time = await current_time()
         total_str = await get_total_text(
-            "SELECT project_code,(SELECT b.name FROM projects b where b.project_code=a.project_code) AS 'project_name',COUNT(*) AS 'all votes',COUNT(DISTINCT `dep_id`) AS 'unique deps',COUNT(DISTINCT `chat_id`) AS 'unique users'  FROM votes a where `project_code`<>'' GROUP BY project_code")
+            "SELECT project_code,(SELECT b.name FROM projects b where b.project_code=a.project_code) AS 'project_name',COUNT(*) AS 'all votes',COUNT(DISTINCT `dep_id`) AS 'unique deps',COUNT(DISTINCT `chat_id`) AS 'unique users'  FROM votes a where `project_code`<>'' and `project_name`<>''GROUP BY project_code")
         await message.answer(
-            """Статистика по обращениям к парламентариям по состоянию на {0}{1} """.format(cur_time, total_str))
+            f"""Статистика по обращениям к парламентариям по состоянию на {cur_time}{total_str} """)
 
 
 @dp.message_handler(commands=['users_count'])
