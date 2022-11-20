@@ -147,7 +147,7 @@ GROUP BY chat_id,project_code,chat_id """
 async def get_project_info(project, field):
     res_list = []
     res_dict = {}
-    sql = """select {1} from projects where `project_code` in ('{0}') """.format(project, field)
+    sql = f"""select {field} from projects where `project_code` in ('{project}') """
     a = await send_sql(sql)
     for item_a in a:
         return str(item_a[0])
@@ -196,11 +196,15 @@ def sql_start():
     # con.commit()
 
 
-async def sql_add_command(state):
+async def sql_add_line(table,state):
     async with state.proxy() as data:
-        cur.execute('insert into menu values (?,?,?,?)', tuple(data.values()))
+        cur.execute(f'insert into {table} values (?,?,?,?,0)', tuple(data.values()))
         con.commit()
 
+async def sql_edit_line(table,state):
+    async with state.proxy() as data:
+        cur.execute(f"UPDATE `{table}` set `{data['name']}`='{data['value']}' where `project_code`='{data['project_code']}';" )
+        con.commit()
 
 async def sql_read(message):
     for ret in cur.execute('SELECT * from menu').fetchall():

@@ -12,6 +12,155 @@ from aiogram.types.chat_member import ChatMember
 
 '''******************** Admin part ********************************'''
 
+'''************* State part '''
+
+
+# Выход из состояний
+@dp.message_handler(state="*", commands='отмена')
+@dp.message_handler(Text(equals='отмена', ignore_case=True), state="*")
+async def cancel_handler(message: types.Message, state: FSMContext):
+    current_state = await state.get_state()
+    if current_state is None:
+        return
+    await state.finish()
+    await message.reply('Ок')
+
+
+"""****** edit project ******"""
+
+
+class FSMAdmin_edit_project(StatesGroup):
+    edit_project_code = State()
+    edit_project_name = State()
+    edit_project_value = State()
+
+
+@dp.message_handler(commands='edit_project', state=None)
+async def cm_start(message: types.Message):
+    if message.from_user.id in admin_chatid_list:
+        await FSMAdmin_edit_project.edit_project_code.set()
+        await message.reply('Введите код проекта без пробелов')
+
+
+# Ловим ответ и пишем в словарь
+@dp.message_handler(state=FSMAdmin_edit_project.edit_project_code)
+async def cm_name(message: types.Message, state: FSMContext):
+    if message.from_user.id in admin_chatid_list:
+        async with state.proxy() as data:
+            data['project_code'] = message.text.lower()
+        await FSMAdmin_edit_project.next()
+        await message.reply("""Редактирование: название параметра:
+<b>project_code
+name
+desc
+short_name
+activity</b>""", parse_mode=types.ParseMode.HTML, )
+
+
+@dp.message_handler(state=FSMAdmin_edit_project.edit_project_name)
+async def cm_name(message: types.Message, state: FSMContext):
+    if message.from_user.id in admin_chatid_list:
+        async with state.proxy() as data:
+            data['name'] = message.text.lower()
+        await FSMAdmin_edit_project.next()
+        await message.reply("""Редактирование: значение параметра""")
+
+
+@dp.message_handler(state=FSMAdmin_edit_project.edit_project_value)
+async def cm_name(message: types.Message, state: FSMContext):
+    if message.from_user.id in admin_chatid_list:
+        async with state.proxy() as data:
+            if data['name'] == 'project_code':
+                data['value'] = message.text.lower()
+            else:
+                data['value'] = message.text
+        await sql_edit_line('projects', state)
+        async with state.proxy() as data:
+            await message.reply(str(data))
+        await state.finish()
+        await message.answer('Обновил! Спасибо!')
+        # text = await sql_to_str("select * from projects")
+        # await send_full_text(message.chat.id, text)
+        await message.answer('Обновил! Спасибо!')
+
+
+"""****** edit project end******"""
+
+"""****** add project ******"""
+
+
+class FSMAdmin_add_project(StatesGroup):
+    new_project_code = State()
+    new_project_name = State()
+    new_project_description = State()
+    new_project_short_name = State()
+
+
+# Начало диалога загрузки нового пункта меню
+@dp.message_handler(commands='new_project', state=None)
+async def cm_start(message: types.Message):
+    if message.from_user.id in admin_chatid_list:
+        await FSMAdmin_add_project.new_project_code.set()
+        await message.reply('Введите код проекта без пробелов')
+
+
+# Ловим ответ и пишем в словарь
+@dp.message_handler(state=FSMAdmin_add_project.new_project_code)
+async def load_new_project_name(message: types.Message, state: FSMContext):
+    if message.from_user.id in admin_chatid_list:
+        async with state.proxy() as data:
+            data['project_code'] = message.text.lower()
+        await FSMAdmin_add_project.next()
+        await message.reply("""Теперь введите название проекта текстом, например:
+        
+🔥 Заявление о внесении в ГД законопроекта о введении верхней границы алиментов
+        """)
+
+
+# Ловим второй ответ
+@dp.message_handler(state=FSMAdmin_add_project.new_project_name)
+async def load_name(message: types.Message, state: FSMContext):
+    if message.from_user.id in admin_chatid_list:
+        async with state.proxy() as data:
+            data['name'] = message.text
+        await FSMAdmin_add_project.next()
+        await message.reply("""Дальше введите описание проекта текстом, например:
+        
+👉 <b><a href="https://vk.cc/c7LhIc">Разово скачайте файл законопроекта</a></b> 
+
+Выбираете тип 'Заявление' и обязательно приложите файл законопроекта к обращению.""")
+
+
+# Ловим третий ответ
+@dp.message_handler(state=FSMAdmin_add_project.new_project_description)
+async def load_description(message: types.Message, state: FSMContext):
+    if message.from_user.id in admin_chatid_list:
+        async with state.proxy() as data:
+            data['desc'] = message.text
+        await FSMAdmin_add_project.next()
+        await message.reply("""Укажите короткое название проекта, например
+        
+законопроект о введении верхней границы алиментов""")
+
+
+# Ловим последний ответ и используем полученные данные
+@dp.message_handler(state=FSMAdmin_add_project.new_project_short_name)
+async def load_price(message: types.Message, state: FSMContext):
+    if message.from_user.id in admin_chatid_list:
+        async with state.proxy() as data:
+            data['short_name'] = message.text
+
+        await sql_add_line('projects', state)
+        async with state.proxy() as data:
+            await message.reply(str(data))
+        await state.finish()
+        await message.answer('Добавил! Спасибо!')
+
+
+"""****** add project end ******"""
+
+'''************* State part end'''
+
 ID = None
 
 
@@ -29,6 +178,9 @@ async def make_changes_command(message: types.Message):
 async def send_admin_info(message: types.Message):
     if message.from_user.id in admin_chatid_list:
         await message.answer("""Команды администратора:
+/new_project - Новый проект
+
+/edit_project - Редактировать проект
 
 /new_users - Новые пользователи
         
@@ -58,8 +210,6 @@ async def send_admin_info(message: types.Message):
 
 {любой текст более 15 символов} - пересылка сообщения в чат поддержки
         """)
-
-
 
 
 @dp.message_handler(commands=['stat'])
@@ -127,6 +277,7 @@ async def send_df(message: types.Message):
         print(df)
         await message.answer("df в принте")
 
+
 @dp.message_handler(commands=['new_users'])
 async def send_total(message: types.Message):
     if message.from_user.id in admin_chatid_list:
@@ -168,6 +319,7 @@ async def send_users_count(message: types.Message):
             text += '\n' + item
         await message.answer(text)
 
+
 @dp.message_handler(commands=['top_users'])
 async def top_users(message: types.Message):
     if message.from_user.id in admin_chatid_list:
@@ -189,6 +341,7 @@ ORDER BY cnt DESC
         for item in list:
             text += '\n\n' + item
         await send_full_text(message.chat.id, text)
+
 
 @dp.message_handler(commands=['last_votes'])
 async def send_last_votes(message: types.Message):
@@ -287,6 +440,7 @@ WHERE a.project_code='alimentover'"""
             text += '\n' + item
         await send_full_text(message.from_user.id, text)  # message.answer(text)
 
+
 @dp.message_handler(lambda message: '/send ' in message.text)
 async def send_to_user(message: types.Message):
     if message.from_user.id in admin_chatid_list:
@@ -326,6 +480,7 @@ async def send_all(message: types.Message):
     else:
         await message.answer('Ничего не понял. Помощь /help')
 
+
 @dp.message_handler(commands=['send_region'])
 async def send_to_start_users(message: types.Message):
     text_err = 'Error (send_region)'
@@ -348,6 +503,7 @@ JOIN region b ON b.id=a.region_id and lower(b.name) LIKE '%{region_like[1:]}%'""
         await send_full_text(80387796, text_err)
     else:
         await message.answer('Ничего не понял. Помощь /help')
+
 
 @dp.message_handler(commands=['send_to_start_users'])
 async def send_to_start_users(message: types.Message):
