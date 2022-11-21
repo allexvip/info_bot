@@ -347,16 +347,23 @@ ORDER BY cnt DESC
 async def send_last_votes(message: types.Message):
     if message.from_user.id in admin_chatid_list:
         cnt = 30
+        project_code = 'alimentover'
         try:
             cnt = message.text.split(' ')[1]
+            try:
+               project_code  = message.text.split(' ')[2]
+            except:
+                pass
+        except:
+            pass
         finally:
             sql = f"""SELECT v.upd||' @'||u.username||' ('||u.chat_id||' '||u.first_name||' '||u.last_name||') -> '||d.dep AS 'answ' FROM votes v
         JOIN users u ON u.chat_id=v.chat_id
         JOIN deps d ON d.rowid=v.dep_id
-        WHERE v.project_code='alimentover'
+        WHERE v.project_code='{project_code}'
         ORDER BY v.upd DESC LIMIT {cnt}
         """
-            text = 'Последние голоса:'
+            text = f'Последние голоса инициативы {project_code}:'
             list = await get_sql_first_column(sql)
             for item in list:
                 text += '\n\n' + item
