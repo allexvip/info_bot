@@ -185,7 +185,7 @@ async def send_admin_info(message: types.Message):
 
 /new_users - Новые пользователи
         
-/top_users - ТОП пользователей
+/top_users {project_code} - ТОП пользователей проекта
 
 /total - всего обращений
 
@@ -324,7 +324,12 @@ async def send_users_count(message: types.Message):
 @dp.message_handler(commands=['top_users'])
 async def top_users(message: types.Message):
     if message.from_user.id in admin_chatid_list:
-        sql = """with aa AS (SELECT v.chat_id,COUNT(*) AS cnt FROM votes v WHERE v.project_code='alimentover' GROUP BY v.chat_id HAVING cnt>20)
+        project_code = 'alimentover'
+        try:
+            project_code = message.text.split(' ')[1]
+        except:
+            pass
+        sql = f"""with aa AS (SELECT v.chat_id,COUNT(*) AS cnt FROM votes v WHERE v.project_code='{project_code}' GROUP BY v.chat_id HAVING cnt>20)
 SELECT 
 iif(username='None','chatid: '||u.chat_id,'@'||username)
 ||' ('||iif(u.first_name='None','',u.first_name)
@@ -337,7 +342,7 @@ JOIN users u ON u.chat_id=aa.chat_id
 LEFT JOIN region r ON r.id=u.region_id
 ORDER BY cnt DESC
     """
-        text = 'ТОП пользователи:'
+        text = f'ТОП пользователи инициативы {project_code}:'
         list = await get_sql_first_column(sql)
         for item in list:
             text += '\n\n' + item
