@@ -96,6 +96,7 @@ async def sql_to_str(sql):
     line_dict = {}
     res = ''
     a = await from_db(sql)
+    print(a)
     for item_a in a:
         for item_index in range(len(item_a)):
             # line_dict[item_index] = str(item_a[item_index])
@@ -163,6 +164,7 @@ async def from_db(sql):
     try:
         # Insert a row of data
         res = cur.execute(sql)
+
         # Save (commit) the changes
         con.commit()
     except Exception as e:
