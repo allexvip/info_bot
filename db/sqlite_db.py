@@ -96,7 +96,6 @@ async def sql_to_str(sql):
     line_dict = {}
     res = ''
     a = await from_db(sql)
-    print(a)
     for item_a in a:
         for item_index in range(len(item_a)):
             # line_dict[item_index] = str(item_a[item_index])
