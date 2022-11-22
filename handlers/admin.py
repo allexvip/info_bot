@@ -330,14 +330,14 @@ async def top_users(message: types.Message):
         except:
             pass
 
-        sql_count = f"""SELECT 'project_code | ','AVG appeals by one user | ','users count'
+        sql_count = f"""SELECT 1 as 'id','project_code | ','AVG appeals by one user | ','users count'
 UNION
-SELECT project_code,sum(cnt)/COUNT(cnt) AS 'appeals by one user',COUNT(chat_id) AS 'users' FROM (
+SELECT '2',project_code,sum(cnt)/COUNT(cnt) AS 'appeals by one user',COUNT(chat_id) AS 'users' FROM (
 SELECT v.project_code,chat_id,COUNT(v.project_code) AS cnt FROM votes v 
 JOIN projects p ON p.project_code=v.project_code
 WHERE v.project_code = '{project_code}' 
 GROUP BY v.project_code,v.chat_id) a 
-GROUP BY project_code"""
+GROUP BY project_code ORDER BY id ASC"""
         await send_full_text(message.chat.id, await sql_to_str(sql_count))
 
         sql = f"""with aa AS (SELECT v.chat_id,COUNT(*) AS cnt FROM votes v WHERE v.project_code='{project_code}' GROUP BY v.chat_id HAVING cnt>20)
