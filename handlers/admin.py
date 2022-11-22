@@ -330,7 +330,7 @@ async def top_users(message: types.Message):
         except:
             pass
 
-        sql_count = f"""SELECT 'project_code | ','appeals by one user | ','users'
+        sql_count = f"""SELECT 'project_code | ','AVG appeals by one user | ','users count'
 UNION
 SELECT project_code,sum(cnt)/COUNT(cnt) AS 'appeals by one user',COUNT(chat_id) AS 'users' FROM (
 SELECT v.project_code,chat_id,COUNT(v.project_code) AS cnt FROM votes v 
