@@ -268,7 +268,7 @@ WHERE a.project_code='{arg_list[1]}' """)
 ✅ Количество пользователей, указавших свой регион: {users_count_regions}
 {text}
 
-https://t.me/{4}""")
+https://t.me/{BOT_NAME}""")
 
 
 @dp.message_handler(commands=['df'])
