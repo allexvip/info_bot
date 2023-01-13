@@ -54,7 +54,7 @@ async def cm_name(message: types.Message, state: FSMContext):
 name
 desc
 short_name
-activity</b>""", parse_mode=types.ParseMode.HTML, )
+activity</b>""", parse_mode=types.ParseMode.HTML)
 
 
 @dp.message_handler(state=FSMAdmin_edit_project.edit_project_name)

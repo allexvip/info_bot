@@ -1,4 +1,5 @@
 from aiogram import types, Dispatcher
+from aiogram.types import ParseMode
 from create_bot import *
 from db.sqlite_db import *
 from aiogram.utils.callback_data import CallbackData
@@ -21,6 +22,7 @@ async def taxi(message: types.Message):
     except Exception as e:
         pass
 
+
 @dp.message_handler(content_types=types.ContentType.ANY)
 async def echo(message: types.Message):
     user_info = {'user name': '', 'status': 'no_info'}
@@ -28,15 +30,15 @@ async def echo(message: types.Message):
         user_info = await bot.get_chat_member(chat_id=MAIN_CHANNEL_CHAT_ID, user_id=message.from_user.id)
     except:
         pass
-    answ_text = '@{0} {1}\n({2} {3} {4}\nОтвет:\n\n/send {4}|'.format(message.from_user.username,
-                                                                      user_info['status'],
-                                                                      message.from_user.first_name,
-                                                                      message.from_user.last_name,
-                                                                      message.from_user.id
-                                                                      )
-    await bot.forward_message(chat_id=BOT_USER_ANSWERS_CHAT_ID, from_chat_id=message.from_user.id,
+    answ_text = f"""@{message.from_user.username} {user_info['status']}
+({message.from_user.first_name} {message.from_user.last_name} {message.from_user.id}
+Ответ:
+
+`/send {message.from_user.id}|`"""
+    msg = await bot.forward_message(chat_id=BOT_USER_ANSWERS_CHAT_ID, from_chat_id=message.from_user.id,
                               message_id=message.message_id, disable_notification=True)
-    await bot.send_message(BOT_USER_ANSWERS_CHAT_ID, answ_text)
+    await msg.reply(answ_text,parse_mode="MARKDOWN")
+
 
 @dp.message_handler()
 async def echo(message: types.Message):
@@ -51,20 +53,20 @@ async def echo(message: types.Message):
             user_info = await bot.get_chat_member(chat_id=MAIN_CHANNEL_CHAT_ID, user_id=message.from_user.id)
         except:
             pass
-        answ_text = '@{0} {1}\n({2} {3} {4}\nОтвет:\n\n/send {4}|'.format(message.from_user.username,
-                                                                          user_info['status'],
-                                                                          message.from_user.first_name,
-                                                                          message.from_user.last_name,
-                                                                          message.from_user.id
-                                                                          )
+        answ_text = f"""@{message.from_user.username} {user_info["status"]}
+({message.from_user.first_name} {message.from_user.last_name} {message.from_user.id}
+Ответ:
+
+send {message.from_user.id}|"""
         if len(message.text) < 15:
             await message.answer('Ничего не понял. Помощь /help')
         else:
             await bot.forward_message(chat_id=BOT_USER_ANSWERS_CHAT_ID, from_chat_id=message.from_user.id,
-                                      message_id=message.message_id, disable_notification=True)
-            await bot.send_message(BOT_USER_ANSWERS_CHAT_ID, answ_text)
+        message_id = message.message_id, disable_notification = True)
+        await bot.send_message(BOT_USER_ANSWERS_CHAT_ID, answ_text)
 
-            # await message.answer('Переслал Ваше сообщение модератору.\nСпасибо! \n\nПомощь /help')
+        # await message.answer('Переслал Ваше сообщение модератору.\nСпасибо! \n\nПомощь /help')
+
     except Exception as e:
         pass
 

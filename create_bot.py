@@ -1,6 +1,6 @@
 from aiogram import Bot
 from aiogram.dispatcher import Dispatcher
-
+from aiogram import types
 import os
 from dotenv import load_dotenv
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
@@ -15,7 +15,7 @@ DB_FILE_NAME = os.getenv('DB_FILE_NAME')
 ADMIN_CHAT_ID = os.getenv('ADMIN_CHAT_ID')
 admin_chatid_list = [int(item) for item in ADMIN_CHAT_ID.split(',')]
 
-bot = Bot(token=os.getenv('TELEGRAM_API_KEY'))
+bot = Bot(token=os.getenv('TELEGRAM_API_KEY'),parse_mode=types.ParseMode.HTML)
 dp = Dispatcher(bot,storage=storage)
 
 con = None
