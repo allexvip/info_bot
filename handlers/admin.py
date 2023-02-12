@@ -50,11 +50,16 @@ async def cm_name(message: types.Message, state: FSMContext):
             data['project_code'] = message.text.lower()
         await FSMAdmin_edit_project.next()
         await message.reply("""Редактирование: название параметра:
-<b>project_code
-name
-desc
-short_name
-activity</b>""", parse_mode=types.ParseMode.HTML)
+        
+`project_code`
+
+`name`
+
+`desc`
+
+`short_name`
+
+`activity`""",parse_mode="MARKDOWN")
 
 
 @dp.message_handler(state=FSMAdmin_edit_project.edit_project_name)
@@ -81,7 +86,7 @@ async def cm_name(message: types.Message, state: FSMContext):
         await message.answer('Обновил! Спасибо!')
         # text = await sql_to_str("select * from projects")
         # await send_full_text(message.chat.id, text)
-        await message.answer('Обновил! Спасибо!')
+        # await message.answer('Обновил! Спасибо!')
 
 
 """****** edit project end******"""
@@ -178,6 +183,8 @@ async def make_changes_command(message: types.Message):
 async def send_admin_info(message: types.Message):
     if message.from_user.id in admin_chatid_list:
         await message.answer("""Команды администратора:
+
+/backup_db - бэкап БД
 
 /new_project - Новый проект
 
@@ -278,6 +285,10 @@ async def send_df(message: types.Message):
         print(df)
         await message.answer("df в принте")
 
+@dp.message_handler(commands=['backup_db'])
+async def send_backup(message: types.Message):
+    if message.from_user.id in admin_chatid_list:
+        await bot.send_document(message.chat.id, open(DB_FILE_NAME, 'rb'))
 
 @dp.message_handler(commands=['new_users'])
 async def send_total(message: types.Message):

@@ -54,12 +54,12 @@ async def get_total_text(sql):
 
     records = cur.fetchall()
     for row in records:
-        res += """\n\n{0}:
+        res += f"""\n\n{row[1]}:
 
-Активные пользователи - {3}.
-Отправлено обращений - {1}.
-Охвачено {2} парламентария(ев).
-""".format(row[1], row[2], row[3], row[4])
+Активные пользователи - {row[4]}.
+Отправлено обращений - {row[2]}.
+Охвачено {row[3]} парламентария(ев).
+"""
 
     return res
 
@@ -143,6 +143,16 @@ GROUP BY chat_id,project_code,chat_id """
         list.append(inList)
     return list
 
+async def get_active_projects():
+    res = ""
+    sql = r"""select `name`,`project_code` from projects where `activity`=1 """
+    a = await from_db(sql)
+    for item_a in a:
+         res += f"""
+
+{item_a[0]} 
+/{item_a[1]}"""
+    return res
 
 async def get_project_info(project, field):
     res_list = []
