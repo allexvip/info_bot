@@ -59,7 +59,7 @@ async def cm_name(message: types.Message, state: FSMContext):
 
 `short_name`
 
-`activity`""",parse_mode="MARKDOWN")
+`activity`""", parse_mode="MARKDOWN")
 
 
 @dp.message_handler(state=FSMAdmin_edit_project.edit_project_name)
@@ -164,7 +164,6 @@ async def load_price(message: types.Message, state: FSMContext):
 
 """****** add project end ******"""
 
-
 '''************* State part end'''
 
 ID = None
@@ -186,6 +185,8 @@ async def send_admin_info(message: types.Message):
         await message.answer("""Команды администратора:
 
 /backup_db - бэкап БД
+
+/user_info {username} - О пользователе (chatid, username, first last names, region, последняя активность)
 
 /new_project - Новый проект
 
@@ -286,10 +287,22 @@ async def send_df(message: types.Message):
         print(df)
         await message.answer("df в принте")
 
+
 @dp.message_handler(commands=['backup_db'])
 async def send_backup(message: types.Message):
     if message.from_user.id in admin_chatid_list:
         await bot.send_document(message.chat.id, open(DB_FILE_NAME, 'rb'))
+
+
+@dp.message_handler(commands=['user_info'])
+async def send_user_info(message: types.Message):
+    if message.from_user.id in admin_chatid_list:
+        username = message.text.split(' ')[1]
+        sql_query = f"SELECT chat_id,username, first_name, last_name,region.name, users.upd from users left join region on region.id=users.region_id where username like '%{username}%' or first_name like '%{username}%' or last_name like '%{username}%'"
+        res_str = await sql_to_str(sql_query)
+        await send_full_text(message.chat.id, f"""Информация о пользователе {username}:\n{str(res_str)} """)
+        # await bot.send_document(message.chat.id, open(DB_FILE_NAME, 'rb'))
+
 
 @dp.message_handler(commands=['new_users'])
 async def send_total(message: types.Message):
@@ -380,7 +393,7 @@ async def send_last_votes(message: types.Message):
         try:
             cnt = message.text.split(' ')[1]
             try:
-               project_code  = message.text.split(' ')[2]
+                project_code = message.text.split(' ')[2]
             except:
                 pass
         except:
