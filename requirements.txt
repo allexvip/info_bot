@@ -2,3 +2,4 @@ aiogram==2.19
 python-dotenv
 pandas
 sqlalchemy
+aioschedule
