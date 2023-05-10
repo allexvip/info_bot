@@ -14,10 +14,11 @@ async def make_backup():
 
 async def scheduler():
     aioschedule.every().day.at("02:00").do(make_backup)
+    print('Set backup at 02:00')
     while True:
         # print('check time')
         await aioschedule.run_pending()
-        await asyncio.sleep(60)
+        await asyncio.sleep(1)
 
 
 async def on_startup(_):
