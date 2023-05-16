@@ -1,0 +1,1 @@
+INSERT INTO "bot_db"."deps" ("dep_full_name", "dep", "link", "person_type", "link_send", "priority") VALUES ('Администрация президента', 'Администрация президента', 'http://letters.kremlin.ru', 'pr', 'http://letters.kremlin.ru', 10);

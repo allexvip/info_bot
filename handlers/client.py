@@ -274,6 +274,15 @@ async def send_project_info(message: types.Message):
         a = await send_sql(sql)
         if not a:
             flag_done = True
+    elif project == 'antialimentfond':
+        sql = f"""SELECT d.rowid,`dep`,`link_send`,d.person_type
+                       FROM deps d
+                       LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{project}' and v.chat_id='{message.chat.id}'
+                       WHERE  "dep" LIKE  '%Администрация президента%' and v.dep_id IS NULL  LIMIT 1"""
+
+        a = await send_sql(sql)
+        if not a:
+            flag_done = True
 
     else:
         """ deps by priority"""
