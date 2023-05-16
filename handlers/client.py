@@ -323,6 +323,7 @@ WHERE d.priority>0 AND d."dep" not LIKE  '%Бастрыкин%' and v.dep_id IS 
             'minjust': "МинЮст",
             'mintrud': "МинТруд",
             'servicegov': "РФ",
+            'pr': "Президент",
 
         }
 
