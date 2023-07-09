@@ -239,6 +239,10 @@ async def send_df(message: types.Message):
                 f"""SELECT COUNT(*) AS 'cnt'  FROM votes a
         JOIN deps d ON d.rowid=a.dep_id AND d.person_type='deputat'
         WHERE a.project_code='{arg_list[1]}' """)
+            appeals_count_pr= await get_sql_one_value(
+                f"""SELECT COUNT(*) AS 'cnt'  FROM votes a
+            JOIN deps d ON d.rowid=a.dep_id AND d.person_type='pr'
+            WHERE a.project_code='{arg_list[1]}' """)
             appeals_count_sf = await get_sql_one_value(
                 f"""SELECT COUNT(*) AS 'cnt'  FROM votes a
 JOIN deps d ON d.rowid=a.dep_id AND d.person_type='sf'
@@ -260,6 +264,10 @@ WHERE a.project_code='{arg_list[1]}' """)
                 text += f"""
                 
 ✅ Количество обращений сенаторам Совета Федерации: {appeals_count_sf}"""
+            if int(appeals_count_pr) > 0:
+                text += f"""
+
+✅ Количество обращений в Администрацию президента: {appeals_count_pr}"""
             if int(appeals_count_sk) > 0:
                 text += f"""
 ✅ Количество обращений Бастрыкину: {appeals_count_sk}"""
