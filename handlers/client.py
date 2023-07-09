@@ -278,7 +278,10 @@ async def send_project_info(message: types.Message):
         sql = f"""SELECT d.rowid,`dep`,`link_send`,d.person_type
                        FROM deps d
                        LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{project}' and v.chat_id='{message.chat.id}'
-                       WHERE  "dep" LIKE  '%Администрация президента%' and v.dep_id IS NULL  LIMIT 1"""
+                       WHERE  ("dep" LIKE  '%Администрация президента%'
+                        or d.dep like "Слуцкий%" or d.dep like "Милонов%" or d.dep like "Матвейчев%" or d.dep like "Сухарев%"
+                        ) and v.dep_id IS NULL
+                        ORDER BY RANDOM() LIMIT 1"""
 
         a = await send_sql(sql)
         if not a:
