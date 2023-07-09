@@ -287,6 +287,24 @@ async def send_project_info(message: types.Message):
         if not a:
             flag_done = True
 
+    elif project == 'zasemu':
+        sql = f"""SELECT d.rowid,`dep`,`link_send`,d.person_type
+                       FROM deps d
+                       LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{project}' and v.chat_id='{message.chat.id}'
+                       WHERE  ("dep" LIKE  '%Администрация президента%'
+                        or d.dep like "Слуцкий%" or d.dep like "Милонов%" or d.dep like "Матвейчев%" or d.dep like "Сухарев%"
+                        or d.priority>=100
+                        ) and v.dep_id IS NULL
+                        ORDER BY 
+                        case 
+                        when (d.dep like "Слуцкий%" or d.dep like "Милонов%" or d.dep like "Матвейчев%" or d.dep like "Сухарев%") then 1000
+                        else d.priority 
+                        end DESC, RANDOM() LIMIT 1"""
+
+        a = await send_sql(sql)
+        if not a:
+            flag_done = True
+
     else:
         """ deps by priority"""
         sql = f"""SELECT d.rowid,`dep`,`link_send`,d.person_type 
