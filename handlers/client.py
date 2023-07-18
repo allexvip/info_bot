@@ -183,22 +183,26 @@ async def send_welcome(message: types.Message):
 
         user_info = await bot.get_chat_member(chat_id=MAIN_CHANNEL_CHAT_ID, user_id=message.from_user.id)
         if not (user_info['status'] in ['left', 'banned', 'restricted']):
-            # votes_count = await sql_to_text("SELECT COUNT(*) as 'Кол-во обращений' FROM votes;", header=False)
-            votes_count = await get_sql_one_value("SELECT COUNT(*) as 'Кол-во обращений' FROM votes;")
-            await message.answer(f"""Добро пожаловать!
-🔻 Я помогу подать обращение законодателям. 🔻
+            if 'vote_' in utm_source:
+                msg = message
+                msg.text = utm_source.replace('vote_', '/')
+                await send_project_info(msg)
+            else:
+                votes_count = await get_sql_one_value("SELECT COUNT(*) as 'Кол-во обращений' FROM votes;")
+                await message.answer(f"""Добро пожаловать!
+    🔻 Я помогу подать обращение законодателям. 🔻
+    
+    ‼️ Всего мы уже написали {votes_count} ‼️обращений(я) законодателям! 💪💪💪
+    
+    Актуальные инициативы:{await get_active_projects()}
+    
+    (напиши пожалуйста более 10 обращений по каждой инициативе, это нужно для информирования ключевых законодателей. Это займет не более 20 минут.)
+    💡 как вставить текст /help
+            """, parse_mode=types.ParseMode.HTML)
 
-‼️ Всего мы уже написали {votes_count} ‼️обращений(я) законодателям! 💪💪💪
-
-Актуальные инициативы:{await get_active_projects()}
-
-(напиши пожалуйста более 10 обращений по каждой инициативе, это нужно для информирования ключевых законодателей. Это займет не более 20 минут.)
-💡 как вставить текст /help
-        """, parse_mode=types.ParseMode.HTML)
-
-            res = await get_data(f"select region_id from users where chat_id = {message.from_user.id} limit 1")
-            if res[0][0] == None:
-                await set_city(message)
+                res = await get_data(f"select region_id from users where chat_id = {message.from_user.id} limit 1")
+                if res[0][0] == None:
+                    await set_city(message)
         else:
             await message.answer("""Бот работает для участников канала "Семейный Фронт".
             
@@ -206,10 +210,7 @@ async def send_welcome(message: types.Message):
 
 Жмите сюда 👉 @semfront
                     """)
-        if 'vote_' in utm_source:
-            msg = message
-            msg.text = utm_source.replace('vote_','/')
-            await send_project_info(msg)
+
     except Exception as e:
         text_err += '\n\n{0}\n@{1}\n\n{2}'.format(message.from_user.id, message.chat.username, str(e))
         await send_full_text(80387796, text_err)
