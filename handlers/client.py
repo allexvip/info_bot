@@ -206,7 +206,10 @@ async def send_welcome(message: types.Message):
 
 Жмите сюда 👉 @semfront
                     """)
-
+        if 'vote_' in utm_source:
+            msg = message
+            msg.text = utm_source.replace('vote_','/')
+            await send_project_info(msg)
     except Exception as e:
         text_err += '\n\n{0}\n@{1}\n\n{2}'.format(message.from_user.id, message.chat.username, str(e))
         await send_full_text(80387796, text_err)
