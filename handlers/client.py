@@ -413,6 +413,8 @@ WHERE d.priority>0 AND d."dep" not LIKE  '%Бастрыкин%' and v.dep_id IS 
                                         reply_markup=get_keyboard(amount))
 
         # ----keyboard end
+        project_name = await get_sql_one_value(
+            "SELECT name from projects where project_code in ('{0}');".format(project))
         project_desc = await get_sql_one_value(
             "SELECT desc from projects where project_code in ('{0}');".format(project))
         text_appeal = f"""
@@ -421,7 +423,7 @@ WHERE d.priority>0 AND d."dep" not LIKE  '%Бастрыкин%' and v.dep_id IS 
 👉 <b><a href='https://semfront.ru/prog/texter.php?to_person={url_repson}&case={project}&user={message.from_user.id}&face={(dep_name.replace(' ', '%20'))}'>Здесь примерный текст обращения</a></b>
 """
         await message.answer(
-            f"{dep_name} ({person_type_str})\n{text_appeal} \n 👉 <b><a href='{link_send}'>Пишем сюда</a></b>\n\n💡 Помощь /help\n\nПосле отправки пожалуйста нажмите кнопку 'Отправлено 👍' \n👇👇👇"
+            f"{project_name}:\n\n{dep_name} ({person_type_str})\n{text_appeal} \n 👉 <b><a href='{link_send}'>Пишем сюда</a></b>\n\n💡 Помощь /help\n\nПосле отправки пожалуйста нажмите кнопку 'Отправлено 👍' \n👇👇👇"
             , parse_mode=types.ParseMode.HTML, reply_markup=get_keyboard(0))
     else:
         await message.answer("""✅ Спасибо Вам за то, что вы отправили обращения! 💪💪💪 
