@@ -147,6 +147,26 @@ order by dep """.format(message.from_user.id)
     await message.answer(text)
 
 
+@dp.callback_query_handler(lambda c: c.data and c.data.startswith('vbtn'))
+async def process_callback_kb1btn1(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id)
+    query = callback_query.data
+    project_code = query.split(":")[1]
+    await send_sql(
+        f"INSERT INTO logs (`chat_id`,`username`,`message`,`upd`) VALUES ('{callback_query.from_user.id}','{callback_query.message.chat.username}','/0_{project_code}',datetime('now'))")
+    await send_sql(
+        "INSERT INTO votes (`chat_id`,`user_answer`,`project_code`,`dep_id`,`upd`) VALUES ('{0}','{1}','{2}','{3}',datetime('now'))".format(
+            callback_query.from_user.id,
+            f'/0_{project_code}',
+            project_code,
+            0))
+
+    await bot.edit_message_text(callback_query.message.text, callback_query.from_user.id, callback_query.message.message_id,
+                                parse_mode=types.ParseMode.HTML,
+                                reply_markup=None)
+    await bot.send_message(callback_query.from_user.id, f'Спасибо за участие!')
+
+
 @dp.message_handler(commands=['start'])
 async def send_welcome(message: types.Message):
     # await message.answer(message.chat.id)

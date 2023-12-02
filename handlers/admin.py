@@ -10,7 +10,6 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from aiogram.types.chat_member import ChatMember
 
-
 '''******************** Admin part ********************************'''
 
 '''************* State part '''
@@ -213,11 +212,11 @@ async def send_admin_info(message: types.Message):
 
 /send_to_start_users {текст} - отправить сообщение новым пользователям бота 
 
-/send {chat_id}|{текст} - текст для отправки пользователю по chat_id
+/send {chat_id}|{текст}|{btn_name}|{project_code} - текст для отправки пользователю по chat_id
 
 /send_region {имя_региона}|{текст} - текст для отправки пользователю по региону
 
-/send_all {текст} - отправить сообщение всем пользователям бота
+/send_all {текст}|{btn_name}|{project_code} - отправить сообщение всем пользователям бота
 
 {любой текст более 15 символов} - пересылка сообщения в чат поддержки
         """)
@@ -239,7 +238,7 @@ async def send_df(message: types.Message):
                 f"""SELECT COUNT(*) AS 'cnt'  FROM votes a
         JOIN deps d ON d.rowid=a.dep_id AND d.person_type='deputat'
         WHERE a.project_code='{arg_list[1]}' """)
-            appeals_count_pr= await get_sql_one_value(
+            appeals_count_pr = await get_sql_one_value(
                 f"""SELECT COUNT(*) AS 'cnt'  FROM votes a
             JOIN deps d ON d.rowid=a.dep_id AND d.person_type='pr'
             WHERE a.project_code='{arg_list[1]}' """)
@@ -508,9 +507,16 @@ async def send_to_user(message: types.Message):
             data_list = msg.split('/send ')[1].split('|')
             to_chat_id = data_list[0]
             message_for_user = data_list[1]
-            # print(to_chat_id + ' ' + message_for_user)
+            if len(data_list) > 2:
+                button_name = data_list[2]
+                button_action = data_list[3]
+                inline_btn = InlineKeyboardButton(button_name, callback_data=f'voted:{button_action}')
+                inline_kb = InlineKeyboardMarkup().add(inline_btn)
             try:
-                await bot.send_message(to_chat_id, message_for_user)
+                if len(data_list) > 2:
+                    await bot.send_message(to_chat_id, message_for_user, reply_markup=inline_kb)
+                else:
+                    await bot.send_message(to_chat_id, message_for_user)
                 await message.answer('Отправлено пользователю: ' + str(to_chat_id))
             except Exception as e:
                 text_err += '\n\n' + str(e)
@@ -523,12 +529,23 @@ async def send_to_user(message: types.Message):
 async def send_all(message: types.Message):
     text_err = 'Error (send all)'
     if message.from_user.id in admin_chatid_list:
-        message_for_users = message.text.replace('/send_all ', '')
+        # message_for_users = message.text.replace('/send_all ', '')
+        data_list = message.text.split('/send_all ')[1].split('|')
+        message_for_user = data_list[0]
+        if len(data_list) > 1:
+            button_name = data_list[1]
+            button_action = data_list[2]
+            inline_btn = InlineKeyboardButton(button_name, callback_data=f'vbtn:{button_action}')
+            inline_kb = InlineKeyboardMarkup().add(inline_btn)
+
         chat_id_list = await get_all_users(con, cur)
         for item_chat_id in chat_id_list:
-            print(item_chat_id + ' ' + message_for_users)
+            print(item_chat_id + ' ' + message_for_user)
             try:
-                await bot.send_message(item_chat_id, message_for_users)
+                if len(data_list) > 1:
+                    await bot.send_message(item_chat_id, message_for_user, reply_markup=inline_kb)
+                else:
+                    await bot.send_message(item_chat_id, message_for_user)
             except Exception as e:
                 text_err += '\n\n' + str(e)
 
