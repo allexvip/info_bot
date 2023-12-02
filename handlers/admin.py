@@ -234,6 +234,11 @@ async def send_df(message: types.Message):
                 f"SELECT name from projects where project_code in ('{arg_list[1]}');")
             users_count_all = await get_users_count(con, cur)
             users_count_regions = await get_region_users_count(con, cur)
+
+            appeals_count_project = await get_sql_one_value(
+                f"""SELECT COUNT(*) AS 'cnt'  FROM votes a
+                    WHERE a.project_code='{arg_list[1]}' """)
+
             appeals_count_deps = await get_sql_one_value(
                 f"""SELECT COUNT(*) AS 'cnt'  FROM votes a
         JOIN deps d ON d.rowid=a.dep_id AND d.person_type='deputat'
@@ -273,7 +278,9 @@ WHERE a.project_code='{arg_list[1]}' """)
             if int(appeals_count_servicegov) > 0:
                 text += f"""
 ✅ Количество обращений в Правительство России: {appeals_count_servicegov}"""
-
+            if int(appeals_count_project)>0:
+                text += f"""
+✅  {project_info} - количество обращений: {appeals_count_project}"""
     await message.answer(f"""https://t.me/{BOT_NAME}
             
 ℹ️ Статистика на {cur_time} (МСК) по инициативе:
