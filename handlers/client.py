@@ -210,14 +210,14 @@ async def send_welcome(message: types.Message):
             else:
                 votes_count = await get_sql_one_value("SELECT COUNT(*) as 'Кол-во обращений' FROM votes;")
                 await message.answer(f"""Добро пожаловать!
-    🔻 Я помогу подать обращение законодателям. 🔻
+🔻 Я помогу подать обращение 🔻
     
-    ‼️ Всего мы уже написали {votes_count} ‼️обращений(я) законодателям! 💪💪💪
+‼️ Всего мы уже написали {votes_count} ‼️обращений(я) законодателям! 💪💪
     
     Актуальные инициативы:{await get_active_projects()}
     
-    (напиши пожалуйста более 10 обращений по каждой инициативе, это нужно для информирования ключевых законодателей. Это займет не более 20 минут.)
-    💡 как вставить текст /help
+(напиши пожалуйста более 10 обращений по каждой инициативе, это нужно для информирования ключевых законодателей. Это займет не более 20 минут.)
+💡 как вставить текст /help
             """, parse_mode=types.ParseMode.HTML)
 
                 res = await get_data(f"select region_id from users where chat_id = {message.from_user.id} limit 1")
@@ -279,7 +279,16 @@ async def send_project_info(message: types.Message):
     # write projects content
     flag_done = False
     project = message.text.replace('/', '')
-    if project == 'copb':
+    if project == 'topresident2023':
+        sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type
+                    FROM deps d
+                    LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
+                    WHERE  "dep" LIKE  '%Прямая линия%' and v.dep_id IS NULL  LIMIT 1""".format(project, message.chat.id)
+
+        a = await send_sql(sql)
+        if not a:
+            flag_done = True
+    elif project == 'copb':
         sql = """SELECT d.rowid,`dep`,`link_send`,d.person_type
                     FROM deps d
                     LEFT JOIN votes v ON v.dep_id=d.rowid and v.project_code='{0}' and v.chat_id='{1}'
@@ -369,6 +378,7 @@ WHERE d.priority>0 AND d."dep" not LIKE  '%Бастрыкин%' and v.dep_id IS 
             'mintrud': "МинТруд",
             'servicegov': "РФ",
             'pr': "Президент",
+            'pr_line': "Прямая линия с Президентом",
 
         }
 
@@ -437,9 +447,13 @@ WHERE d.priority>0 AND d."dep" not LIKE  '%Бастрыкин%' and v.dep_id IS 
             "SELECT name from projects where project_code in ('{0}');".format(project))
         project_desc = await get_sql_one_value(
             "SELECT desc from projects where project_code in ('{0}');".format(project))
-        text_appeal = f"""
-{project_desc}
-        
+
+        text_appeal = ""
+        if project_desc:
+            text_appeal = f"""
+            {project_desc}
+            """
+        text_appeal += f"""
 👉 <b><a href='https://semfront.ru/prog/texter.php?to_person={url_repson}&case={project}&user={message.from_user.id}&face={(dep_name.replace(' ', '%20'))}'>Здесь примерный текст обращения</a></b>
 """
         await message.answer(

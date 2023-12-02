@@ -1,0 +1,2 @@
+INSERT INTO "bot_db"."projects" ("project_code", "name", "desc","activity") VALUES ('to_president_2023', 'Прямая линия с Президентом 2023', 'Прямая линия с Президентом 2023',1);
+INSERT INTO "bot_db"."deps" ("dep_full_name", "dep", "link", "person_type", "link_send", "priority") VALUES ('Прямая линия с Президентом', 'Прямая линия с Президентом', 'http://moskva-putinu.ru', 'pr_line', 'http://moskva-putinu.ru', 10);
