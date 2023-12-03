@@ -167,6 +167,7 @@ async def process_callback_kb1btn1(callback_query: types.CallbackQuery):
     await bot.send_message(callback_query.from_user.id, f'Спасибо за участие! 👍')
 
 
+    # delete_message(message.from_user.id, -1)
 @dp.message_handler(commands=['start'])
 async def send_welcome(message: types.Message):
     # await message.answer(message.chat.id)
