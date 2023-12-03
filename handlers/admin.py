@@ -538,34 +538,40 @@ async def send_to_user(message: types.Message):
 async def del_last_msg(message: types.Message):
     text_err = 'Error (send all)'
     if message.from_user.id in admin_chatid_list:
-        with open("delete_msg.log","w") as f:
+        with open("delete_msg.log", "w") as f:
+            f.write("Removed\n")
             del_last_messages = int(message.text.replace('/del_all ', ''))
             users_count = 0
             chat_id_list = await get_all_users(con, cur)
             len_users = len(chat_id_list)
+            msg = await bot.send_message(BOT_USER_ANSWERS_CHAT_ID, f"Чистка началась по {del_last_messages} шт.")
             for item_chat_id in chat_id_list:
                 try:
                     users_count += 1
-                    msg = await bot.send_message(item_chat_id,
-                                                 "Уже отправили соообщения на прямую линию? https://t.me/semfront/3710")
                     # Все сообщения, начиная с текущего и до первого (message_id = 0)
                     start_rmv_message_id = msg.message_id - 1
                     finish_rmv_message_id = int(msg.message_id) - 1 - del_last_messages
                     deleted_msg_count = 0
                     # for i in range(start_rmv_message_id, 0, -1):
-                    while deleted_msg_count < del_last_messages:
+                    stop = False
+                    start_rmv_message_id=5
+                    while deleted_msg_count < del_last_messages and stop == False:
                         try:
-                            await bot.delete_message(msg.chat.id, start_rmv_message_id)
+                            await bot.delete_message(item_chat_id, start_rmv_message_id)
+                            # await bot.delete_message(item_chat_id, start_rmv_message_id)
                             deleted_msg_count += 1
-                            f.write(f"deleting: {deleted_msg_count},{msg.chat.id},{start_rmv_message_id}\n")
+                            f.write(f"{deleted_msg_count},{item_chat_id},{start_rmv_message_id}\n")
                         except Exception as e:
-                            pass
-                            # print(f"Exception {msg.chat.id},{start_rmv_message_id} {str(e)}")
+                            print(f"Exception {deleted_msg_count} {item_chat_id},{start_rmv_message_id} {str(e)}")
                         start_rmv_message_id = start_rmv_message_id - 1
+                        if start_rmv_message_id <= 0:
+                            stop = True
                     f.flush()
                 except Exception as e:
                     pass
                     # await bot.send_message(80387796, f"Cleared {item_chat_id}")
+        await bot.send_message(BOT_USER_ANSWERS_CHAT_ID, "Чистка завершена")
+        await bot.send_document(BOT_USER_ANSWERS_CHAT_ID, open("delete_msg.log", 'rb'))
 
 
 @dp.message_handler(commands=['send_all'])
